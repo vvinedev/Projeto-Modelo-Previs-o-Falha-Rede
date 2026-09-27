@@ -1,0 +1,10 @@
+*.csv
+*.parquet
+*.zip
+data/raw/*.json
+!data/raw/*_metadata.json
+
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.DS_Store

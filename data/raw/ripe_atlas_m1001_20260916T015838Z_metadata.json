@@ -1,0 +1,16 @@
+{
+  "measurement_id": 1001,
+  "url": "https://atlas.ripe.net/api/v2/measurements/1001/results/",
+  "parametros": {
+    "start": 1789520310,
+    "stop": 1789523910
+  },
+  "inicio_utc": "2026-09-16T00:58:30.554106+00:00",
+  "fim_utc": "2026-09-16T01:58:30.554106+00:00",
+  "coletado_em_utc": "2026-09-16T01:58:38.157323+00:00",
+  "status_http": 200,
+  "quantidade_registros": 203925,
+  "quantidade_colunas_dataframe": 25,
+  "arquivo_json": "ripe_atlas_m1001_20260916T015838Z.json",
+  "arquivo_tabelar": "ripe_atlas_m1001_20260916T015838Z.csv"
+}

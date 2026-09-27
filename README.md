@@ -63,7 +63,7 @@ O principal risco da opção escolhida é que a equipe não possui controle dire
 - **Tempo dedicado (aprox.):** 2h30
 - **Evidência da contribuição:** *(prints de conversas no grupo e histórico de commits no repositório)*
 
-### Integrante 2 — Vinicius Firmino Solto
+### Integrante 2 — Vinicius Firmino Souto
 - **O que fez nesta etapa:** Pesquisei a documentação da API do RIPE Atlas, analisando como funciona a autenticação, a criação de medições e a consulta dos resultados. Também comparei a complexidade da API com a utilização de um dataset já disponível.
 - **Tempo dedicado (aprox.):** 2h30
 - **Evidência da contribuição:** *(prints de conversas no grupo e anotações técnicas compartilhadas)*
