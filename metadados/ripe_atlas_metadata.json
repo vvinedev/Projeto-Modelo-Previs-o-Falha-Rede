@@ -1,0 +1,25 @@
+{
+  "dataset_nome": "ripe_atlas_mesh_14dias",
+  "periodo_a_baseline": {
+    "inicio_utc": "2026-09-06T04:32:00Z",
+    "fim_utc": "2026-09-13T04:32:00Z",
+    "duracao_dias": 7,
+    "minimo_amostras_validas_exigido": 1500
+  },
+  "periodo_b_dataset": {
+    "inicio_utc": "2026-09-13T04:32:00Z",
+    "fim_utc": "2026-09-20T04:32:00Z",
+    "duracao_dias": 7
+  },
+  "step_segundos": 240,
+  "total_registros": 336326,
+  "total_fluxos": 67,
+  "fluxos_insuficientes": [
+    "301|170.81.100.114",
+    "302|170.81.100.114",
+    "303|170.81.100.114"
+  ],
+  "fluxos_elegiveis_baseline": 64,
+  "origem_dados": "RIPE Atlas Anchoring Mesh (IPv4, ping GET)",
+  "arquivo_csv": "ripe_atlas_14dias_20260920T043200Z.csv"
+}

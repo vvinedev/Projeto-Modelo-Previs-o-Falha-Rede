@@ -7,11 +7,11 @@
 **Equipe:** Grupo 42  
 **Integrantes:**  
 - Wendell Rodrigues Macedo  
-- Vinicius Firmino Solto  
+- Vinicius Firmino Souto  
 - Fernando Paiva Coelho  
 - João Gustavo Sanches  
 - Daniel Dias Paranhos  
-**Scrum Master da tarefa:** Vinicius Firmino Solto  
+**Scrum Master da tarefa:** Vinicius Firmino Souto  
 **Repositório GitHub:** [https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede](https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede)
 
 > Esta tarefa entrega a contextualização do problema e a **ingestão do dado bruto**. Não há classe OK, RISCO ou FALHA. Não há baseline, não há mediana e não há árvore. Quem rotular aqui mistura a coleta com a decisão da Tarefa 2.
@@ -100,7 +100,7 @@ Cada registro bruto guarda, conforme retornado pela API:
 ## 4. Scrum
 
 - [x] **Product Owner:** Profa. Andréa Ono Sakai
-- [x] **Scrum Master da tarefa:** Vinicius Firmino Solto
+- [x] **Scrum Master da tarefa:** Vinicius Firmino Souto
 - [x] **Equipe de Desenvolvimento:** Wendell Rodrigues Macedo, Fernando Paiva Coelho, João Gustavo Sanches, Daniel Dias Paranhos
 - [x] Board Kanban atualizado com histórias priorizadas e entregues
 
@@ -139,7 +139,7 @@ Cada registro bruto guarda, conforme retornado pela API:
 
 | Integrante | O que fiz nesta tarefa | Dificuldades | O que pretendo manter/ajustar |
 |---|---|---|---|
-| **Vinicius Firmino Solto** (Scrum Master) | Coordenação do escopo da equipe, condução das discussões, elaboração da justificativa técnica da escolha do ping IPv4 na medição 1001 em relação ao memorando SIMET e preenchimento do checklist/resumo final. | Alinhar a escolha da fonte de dados mantendo o escopo restrito à ingestão bruta sem rotulagem prematura. | Manter a rotina de reuniões de alinhamento e garantir que os contratos de dados sejam seguidos na Tarefa 2. |
+| **Vinicius Firmino Souto** (Scrum Master) | Coordenação do escopo da equipe, condução das discussões, elaboração da justificativa técnica da escolha do ping IPv4 na medição 1001 em relação ao memorando SIMET e preenchimento do checklist/resumo final. | Alinhar a escolha da fonte de dados mantendo o escopo restrito à ingestão bruta sem rotulagem prematura. | Manter a rotina de reuniões de alinhamento e garantir que os contratos de dados sejam seguidos na Tarefa 2. |
 | **Wendell Rodrigues Macedo** | Configuração dos parâmetros de consulta da API RIPE Atlas (ID 1001, janela móvel de 1h em UTC e timeout de 60s), execução da requisição HTTP com validação do status 200 e versionamento do notebook no repositório GitHub. | Tratar as especificidades de formato temporal em UTC e garantir que a consulta retornasse status HTTP 200 estável. | Manter o controle de versão contínuo e a parametrização explícita para as próximas etapas. |
 | **Fernando Paiva Coelho** | Recepção do payload JSON da API RIPE Atlas, validação estrutural dos dados brutos recebidos e implementação da conversão dos 203.925 registros em DataFrame do Pandas. | Normalizar a estrutura aninhada do JSON original da API sem perda de dimensionalidade de colunas. | Aprimorar as rotinas de tratamento tabular para as tabelas intermediárias da Tarefa 2. |
 | **João Gustavo Sanches** | Inspeção de integridade dos dados brutos no DataFrame, análise dos tipos de colunas, contagem de registros e verificação da granularidade de medição (`prb_id`, `sent`, `rcvd`, `result`). | Evitar que campos nulos de timeout fossem incorretamente imputados como 0 ms durante a análise exploratória. | Automatizar checagens de consistência nos dados brutos antes de iniciar o cálculo do baseline. |

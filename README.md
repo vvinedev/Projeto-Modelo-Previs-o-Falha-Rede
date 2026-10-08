@@ -6,7 +6,7 @@
 | Projeto integrador | Preditor de Falha e Risco em Dispositivos de Rede |
 | Orientador(a) | Andrea Ono Sakai |
 | Data de entrega desta etapa | 08/09/2026 |
-| Integrantes do grupo | Wendell Rodrigues Macedo, Vinicius Firmino Solto, Fernando Paiva Coelho, Joao Gustavo Sanches, Daniel Dias Paranhos |
+| Integrantes do grupo | Wendell Rodrigues Macedo, Vinicius Firmino Souto, Fernando Paiva Coelho, Joao Gustavo Sanches, Daniel Dias Paranhos |
 
 ---
 
