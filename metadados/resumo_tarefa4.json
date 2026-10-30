@@ -1,0 +1,710 @@
+{
+  "contrato": {
+    "n_treino": 80386,
+    "n_validacao": 32148,
+    "n_teste_fechado": 48270,
+    "corte_igual_tarefa2": true,
+    "coluna_rota_entrou": false,
+    "colunas_usadas_x": [
+      "z_robusto",
+      "aumento_pct",
+      "jitter_relativo",
+      "perda_pct",
+      "timeout_atual",
+      "n5_timeout",
+      "n5_aumento80",
+      "n5_risco"
+    ],
+    "colunas_proibidas_bloqueadas": [
+      "timestamp",
+      "datetime_utc",
+      "fluxo_id",
+      "prb_id",
+      "dst_addr",
+      "sent",
+      "rcvd",
+      "avg_rtt_ms",
+      "jitter_ms",
+      "mediana_baseline_ms",
+      "mad_baseline_ms",
+      "jitter_tipico_ms",
+      "ordem_regra",
+      "split"
+    ]
+  },
+  "mapeamento_erro_mudanca": [
+    {
+      "erro_tarefa3": "500 medições de FALHA classificadas como OK na validação (sendo 101 em caminhos curtos DE->DE, AR->AR, BR->BR; Recall de FALHA = 96,17%), todas da Ordem 2 (n5_timeout >= 3 quando o pacote atual respondeu com perda_pct = 0%).",
+      "causa_na_arvore_t3": "Profundidade truncada em max_depth = 3, que encerrou o ramo esquerdo após testar z_robusto, perda_pct e n5_aumento80, sem abrir nó para n5_timeout.",
+      "mudanca_aplicada_t4": "Aumento de max_depth de 3 para 6, permitindo abrir no nível 3 a divisão n5_timeout <= 2,5000 (isolando todas as 1.372 amostras de treino e 500 de validação em uma folha pura de FALHA)."
+    },
+    {
+      "erro_tarefa3": "Desaparecimento total da classe RISCO na validação (131 amostras RISCO -> OK; Recall de RISCO = 0,00%, F1 de RISCO = 0,0000, derrubando o F1 macro para 0,6546).",
+      "causa_na_arvore_t3": "Por ser a classe minoritária (0,31% no treino e 0,41% na validação), a separação entre pico isolado (OK) e desvio moderado persistente (RISCO) ocorre após a filtragem dos 4 gatilhos de FALHA, exigindo níveis 4 e 5 da árvore.",
+      "mudanca_aplicada_t4": "Expansão de max_depth para 6 e ajuste de min_samples_leaf de 50 para 20, abrindo nos níveis 4 e 5 os cortes z_robusto <= 2,0003 e n5_risco <= 1,5000 (separando os 793 picos isolados como OK e os 252 desvios moderados persistentes como RISCO)."
+    },
+    {
+      "erro_tarefa3": "3 medições OK de pico isolado na validação (e 5 no treino) com 3,4073 < z_robusto < 3,50 e n5_risco = 1 classificadas erroneamente como FALHA (Falso Positivo de FALHA).",
+      "causa_na_arvore_t3": "O critério de Gini na raiz deslocou o corte de 3,50 para z_robusto <= 3,4073 (para absorver 14 amostras com perda_pct >= 10% nessa faixa) e min_samples_leaf = 50 impediu purificar a folha de 50 amostras resultante.",
+      "mudanca_aplicada_t4": "Troca do critério de impureza de 'gini' para 'entropy' (ganho de informação) combinada com min_samples_leaf = 20: a entropia penaliza logaritmicamente a mistura de 5 OK e 1 RISCO na folha de 19.569 FALHAs, cravando o corte da raiz exatamente em z_robusto <= 3,5010 e eliminando 100% dos falsos positivos de pico isolado."
+    }
+  ],
+  "experimentos_validacao": [
+    {
+      "criterion": "gini",
+      "max_depth": 3,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 3,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "f1_macro": 0.6546,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9803,
+      "acuracia": 0.9803,
+      "total_erros": 634,
+      "erros_falha_em_ok": 500,
+      "erros_risco_em_ok": 131,
+      "erros_ok_em_falha": 3,
+      "descricao": "Árvore Inicial (Tarefa 3 — referência)"
+    },
+    {
+      "criterion": "gini",
+      "max_depth": 4,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 4,
+      "n_folhas": 6,
+      "n_nos": 11,
+      "f1_macro": 0.6655,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0,
+      "f1_ok": 0.9965,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9999,
+      "acuracia": 0.9958,
+      "total_erros": 134,
+      "erros_falha_em_ok": 0,
+      "erros_risco_em_ok": 131,
+      "erros_ok_em_falha": 3,
+      "descricao": "Tentativa 1 (Descartada): resolve FALHA de n5_timeout, mas mantém RISCO sumindo (0%) e 3 falsos positivos OK->FALHA"
+    },
+    {
+      "criterion": "gini",
+      "max_depth": 5,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 5,
+      "n_folhas": 7,
+      "n_nos": 13,
+      "f1_macro": 0.6655,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0,
+      "f1_ok": 0.9965,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9999,
+      "acuracia": 0.9958,
+      "total_erros": 134,
+      "erros_falha_em_ok": 0,
+      "erros_risco_em_ok": 131,
+      "erros_ok_em_falha": 3,
+      "descricao": "Tentativa 2 (Descartada): abre z_robusto <= 2.0003, mas para antes de separar n5_risco >= 2 (RISCO continua 0%)"
+    },
+    {
+      "criterion": "gini",
+      "max_depth": 6,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 6,
+      "n_folhas": 8,
+      "n_nos": 15,
+      "f1_macro": 0.9999,
+      "recall_falha": 1.0,
+      "recall_risco": 1.0,
+      "f1_ok": 0.9999,
+      "f1_risco": 1.0,
+      "f1_falha": 0.9999,
+      "acuracia": 0.9999,
+      "total_erros": 3,
+      "erros_falha_em_ok": 0,
+      "erros_risco_em_ok": 0,
+      "erros_ok_em_falha": 3,
+      "descricao": "Tentativa 3 (Descartada): recupera RISCO (100%) e FALHA (100%), mas mantém 3 falsos positivos OK->FALHA na faixa 3.4073 < z <= 3.5010"
+    },
+    {
+      "criterion": "gini",
+      "max_depth": 6,
+      "min_samples_leaf": 5,
+      "profundidade_obtida": 6,
+      "n_folhas": 9,
+      "n_nos": 17,
+      "f1_macro": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 1.0,
+      "f1_ok": 1.0,
+      "f1_risco": 1.0,
+      "f1_falha": 1.0,
+      "acuracia": 1.0,
+      "total_erros": 0,
+      "erros_falha_em_ok": 0,
+      "erros_risco_em_ok": 0,
+      "erros_ok_em_falha": 0,
+      "descricao": "Tentativa 4 (Descartada por parcimônia): zera erros na validação, mas exige 9 folhas para corrigir o corte torto da raiz do Gini"
+    },
+    {
+      "criterion": "entropy",
+      "max_depth": 6,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 6,
+      "n_folhas": 7,
+      "n_nos": 13,
+      "f1_macro": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 1.0,
+      "f1_ok": 1.0,
+      "f1_risco": 1.0,
+      "f1_falha": 1.0,
+      "acuracia": 1.0,
+      "total_erros": 0,
+      "erros_falha_em_ok": 0,
+      "erros_risco_em_ok": 0,
+      "erros_ok_em_falha": 0,
+      "descricao": "Árvore Ajustada Oficial (Tarefa 4 — Escolhida): corta a raiz em z_robusto <= 3.5010, gera apenas 7 folhas 100% puras e zera todos os erros na validação"
+    }
+  ],
+  "experimento_feature_nova": {
+    "feature_candidata": "delta_z_robusto = z_robusto(t) - z_robusto(t-1) no mesmo fluxo_id",
+    "profundidade_obtida": 6,
+    "n_folhas": 7,
+    "f1_macro_val": 1.0,
+    "decisao": "Descartada por parcimônia: a árvore com as 8 colunas originais de COLUNAS_MODELO (entropy, max_depth=6, min_samples_leaf=20) já atingiu F1 macro = 1.0000 com 7 folhas sem usar delta_z_robusto em nenhum nó."
+  },
+  "arvore_ajustada": {
+    "parametros": {
+      "algoritmo": "DecisionTreeClassifier (CART)",
+      "criterion": "entropy",
+      "max_depth": 6,
+      "min_samples_leaf": 20,
+      "random_state": 42
+    },
+    "profundidade_maxima_pedida": 6,
+    "profundidade_real_obtida": 6,
+    "numero_folhas": 7,
+    "numero_nos_totais": 13,
+    "diagrama_texto": "|--- z_robusto <= 3.5010 (n=80386, entropy=1.0058)\n|   |--- perda_pct <= 16.6650 (n=60817, entropy=0.8028)\n|   |   |--- n5_aumento80 <= 1.5000 (n=50520, entropy=0.3902)\n|   |   |   |--- n5_timeout <= 2.5000 (n=48629, entropy=0.2319)\n|   |   |   |   |--- z_robusto <= 2.0003 (n=47257, entropy=0.0479)\n|   |   |   |   |   |--- classe: OK (n=46212, [OK=46212, RISCO=0, FALHA=0], entropy=-0.0000)\n|   |   |   |   |--- z_robusto >  2.0003\n|   |   |   |   |   |--- n5_risco <= 1.5000 (n=1045, entropy=0.7969)\n|   |   |   |   |   |   |--- classe: OK (n=793, [OK=793, RISCO=0, FALHA=0], entropy=-0.0000)\n|   |   |   |   |   |--- n5_risco >  1.5000\n|   |   |   |   |   |   |--- classe: RISCO (n=252, [OK=0, RISCO=252, FALHA=0], entropy=-0.0000)\n|   |   |   |--- n5_timeout >  2.5000\n|   |   |   |   |--- classe: FALHA (n=1372, [OK=0, RISCO=0, FALHA=1372], entropy=-0.0000)\n|   |   |--- n5_aumento80 >  1.5000\n|   |   |   |--- classe: FALHA (n=1891, [OK=0, RISCO=0, FALHA=1891], entropy=-0.0000)\n|   |--- perda_pct >  16.6650\n|   |   |--- classe: FALHA (n=10297, [OK=0, RISCO=0, FALHA=10297], entropy=-0.0000)\n|--- z_robusto >  3.5010\n|   |--- classe: FALHA (n=19569, [OK=0, RISCO=0, FALHA=19569], entropy=-0.0000)",
+    "regras_portugues": [
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto <= 2.0003, então classe = OK",
+        "classe_folha": "OK",
+        "profundidade_folha": 5,
+        "n_treino": 46212,
+        "contagem_treino": {
+          "OK": 46212,
+          "RISCO": 0,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto > 2.0003 e n5_risco <= 1.5000, então classe = OK",
+        "classe_folha": "OK",
+        "profundidade_folha": 6,
+        "n_treino": 793,
+        "contagem_treino": {
+          "OK": 793,
+          "RISCO": 0,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto > 2.0003 e n5_risco > 1.5000, então classe = RISCO",
+        "classe_folha": "RISCO",
+        "profundidade_folha": 6,
+        "n_treino": 252,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 252,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout > 2.5000, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 4,
+        "n_treino": 1372,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 1372
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 > 1.5000, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 3,
+        "n_treino": 1891,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 1891
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct > 16.6650, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 2,
+        "n_treino": 10297,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 10297
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto > 3.5010, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 1,
+        "n_treino": 19569,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19569
+        },
+        "impureza": -0.0
+      }
+    ],
+    "estrutura_nos": {
+      "depth": 0,
+      "n_samples": 80386,
+      "counts": [
+        47005,
+        252,
+        33129
+      ],
+      "counts_dict": {
+        "OK": 47005,
+        "RISCO": 252,
+        "FALHA": 33129
+      },
+      "impurity": 1.005784,
+      "criterion": "entropy",
+      "pred_class": "OK",
+      "is_leaf": false,
+      "feature_idx": 0,
+      "feature": "z_robusto",
+      "threshold": 3.501,
+      "impurity_gain": 0.398422,
+      "left": {
+        "depth": 1,
+        "n_samples": 60817,
+        "counts": [
+          47005,
+          252,
+          13560
+        ],
+        "counts_dict": {
+          "OK": 47005,
+          "RISCO": 252,
+          "FALHA": 13560
+        },
+        "impurity": 0.802793,
+        "criterion": "entropy",
+        "pred_class": "OK",
+        "is_leaf": false,
+        "feature_idx": 3,
+        "feature": "perda_pct",
+        "threshold": 16.665,
+        "impurity_gain": 0.478627,
+        "left": {
+          "depth": 2,
+          "n_samples": 50520,
+          "counts": [
+            47005,
+            252,
+            3263
+          ],
+          "counts_dict": {
+            "OK": 47005,
+            "RISCO": 252,
+            "FALHA": 3263
+          },
+          "impurity": 0.390238,
+          "criterion": "entropy",
+          "pred_class": "OK",
+          "is_leaf": false,
+          "feature_idx": 6,
+          "feature": "n5_aumento80",
+          "threshold": 1.5,
+          "impurity_gain": 0.166981,
+          "left": {
+            "depth": 3,
+            "n_samples": 48629,
+            "counts": [
+              47005,
+              252,
+              1372
+            ],
+            "counts_dict": {
+              "OK": 47005,
+              "RISCO": 252,
+              "FALHA": 1372
+            },
+            "impurity": 0.231939,
+            "criterion": "entropy",
+            "pred_class": "OK",
+            "is_leaf": false,
+            "feature_idx": 5,
+            "feature": "n5_timeout",
+            "threshold": 2.5,
+            "impurity_gain": 0.185353,
+            "left": {
+              "depth": 4,
+              "n_samples": 47257,
+              "counts": [
+                47005,
+                252,
+                0
+              ],
+              "counts_dict": {
+                "OK": 47005,
+                "RISCO": 252,
+                "FALHA": 0
+              },
+              "impurity": 0.047939,
+              "criterion": "entropy",
+              "pred_class": "OK",
+              "is_leaf": false,
+              "feature_idx": 0,
+              "feature": "z_robusto",
+              "threshold": 2.0003,
+              "impurity_gain": 0.030316,
+              "left": {
+                "depth": 5,
+                "n_samples": 46212,
+                "counts": [
+                  46212,
+                  0,
+                  0
+                ],
+                "counts_dict": {
+                  "OK": 46212,
+                  "RISCO": 0,
+                  "FALHA": 0
+                },
+                "impurity": -0.0,
+                "criterion": "entropy",
+                "pred_class": "OK",
+                "is_leaf": true
+              },
+              "right": {
+                "depth": 5,
+                "n_samples": 1045,
+                "counts": [
+                  793,
+                  252,
+                  0
+                ],
+                "counts_dict": {
+                  "OK": 793,
+                  "RISCO": 252,
+                  "FALHA": 0
+                },
+                "impurity": 0.796945,
+                "criterion": "entropy",
+                "pred_class": "OK",
+                "is_leaf": false,
+                "feature_idx": 7,
+                "feature": "n5_risco",
+                "threshold": 1.5,
+                "impurity_gain": 0.796945,
+                "left": {
+                  "depth": 6,
+                  "n_samples": 793,
+                  "counts": [
+                    793,
+                    0,
+                    0
+                  ],
+                  "counts_dict": {
+                    "OK": 793,
+                    "RISCO": 0,
+                    "FALHA": 0
+                  },
+                  "impurity": -0.0,
+                  "criterion": "entropy",
+                  "pred_class": "OK",
+                  "is_leaf": true
+                },
+                "right": {
+                  "depth": 6,
+                  "n_samples": 252,
+                  "counts": [
+                    0,
+                    252,
+                    0
+                  ],
+                  "counts_dict": {
+                    "OK": 0,
+                    "RISCO": 252,
+                    "FALHA": 0
+                  },
+                  "impurity": -0.0,
+                  "criterion": "entropy",
+                  "pred_class": "RISCO",
+                  "is_leaf": true
+                }
+              }
+            },
+            "right": {
+              "depth": 4,
+              "n_samples": 1372,
+              "counts": [
+                0,
+                0,
+                1372
+              ],
+              "counts_dict": {
+                "OK": 0,
+                "RISCO": 0,
+                "FALHA": 1372
+              },
+              "impurity": -0.0,
+              "criterion": "entropy",
+              "pred_class": "FALHA",
+              "is_leaf": true
+            }
+          },
+          "right": {
+            "depth": 3,
+            "n_samples": 1891,
+            "counts": [
+              0,
+              0,
+              1891
+            ],
+            "counts_dict": {
+              "OK": 0,
+              "RISCO": 0,
+              "FALHA": 1891
+            },
+            "impurity": -0.0,
+            "criterion": "entropy",
+            "pred_class": "FALHA",
+            "is_leaf": true
+          }
+        },
+        "right": {
+          "depth": 2,
+          "n_samples": 10297,
+          "counts": [
+            0,
+            0,
+            10297
+          ],
+          "counts_dict": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 10297
+          },
+          "impurity": -0.0,
+          "criterion": "entropy",
+          "pred_class": "FALHA",
+          "is_leaf": true
+        }
+      },
+      "right": {
+        "depth": 1,
+        "n_samples": 19569,
+        "counts": [
+          0,
+          0,
+          19569
+        ],
+        "counts_dict": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19569
+        },
+        "impurity": -0.0,
+        "criterion": "entropy",
+        "pred_class": "FALHA",
+        "is_leaf": true
+      }
+    }
+  },
+  "avaliacao_treino_ajustada": {
+    "matriz_confusao": {
+      "OK": {
+        "OK": 47005,
+        "RISCO": 0,
+        "FALHA": 0
+      },
+      "RISCO": {
+        "OK": 0,
+        "RISCO": 252,
+        "FALHA": 0
+      },
+      "FALHA": {
+        "OK": 0,
+        "RISCO": 0,
+        "FALHA": 33129
+      }
+    },
+    "por_classe": {
+      "OK": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 47005
+      },
+      "RISCO": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 252
+      },
+      "FALHA": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 33129
+      }
+    },
+    "f1_macro": 1.0,
+    "balanced_accuracy": 1.0,
+    "acuracia": 1.0,
+    "total_amostras": 80386,
+    "total_erros": 0
+  },
+  "avaliacao_validacao_ajustada": {
+    "matriz_confusao": {
+      "OK": {
+        "OK": 18975,
+        "RISCO": 0,
+        "FALHA": 0
+      },
+      "RISCO": {
+        "OK": 0,
+        "RISCO": 131,
+        "FALHA": 0
+      },
+      "FALHA": {
+        "OK": 0,
+        "RISCO": 0,
+        "FALHA": 13042
+      }
+    },
+    "por_classe": {
+      "OK": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 18975
+      },
+      "RISCO": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 131
+      },
+      "FALHA": {
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "suporte": 13042
+      }
+    },
+    "f1_macro": 1.0,
+    "balanced_accuracy": 1.0,
+    "acuracia": 1.0,
+    "total_amostras": 32148,
+    "total_erros": 0
+  },
+  "comparacao_tarefa3_tarefa4": {
+    "tarefa3": {
+      "criterion": "gini",
+      "max_depth": 3,
+      "min_samples_leaf": 50,
+      "n_folhas": 5,
+      "f1_macro": 0.6546,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9803,
+      "acuracia": 0.9803,
+      "total_erros_val": 634
+    },
+    "tarefa4": {
+      "criterion": "entropy",
+      "max_depth": 6,
+      "min_samples_leaf": 20,
+      "n_folhas": 7,
+      "f1_macro": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 1.0,
+      "f1_ok": 1.0,
+      "f1_risco": 1.0,
+      "f1_falha": 1.0,
+      "acuracia": 1.0,
+      "total_erros_val": 0
+    },
+    "ganho_absoluto": {
+      "delta_f1_macro": 0.3454,
+      "delta_recall_falha": 0.0383,
+      "delta_recall_risco": 1.0,
+      "erros_eliminados_val": 634
+    }
+  },
+  "auditoria_validacao_ajustada": {
+    "longo_ok_total": 4530,
+    "longo_ok_erros": 0,
+    "curto_falha_total": 3066,
+    "curto_falha_erros": 0,
+    "exemplos_corrigidos": [
+      {
+        "caso": "Erro 3 da Tarefa 3 (RISCO persistente z=2.0534 e n5_risco=2 que caía em OK)",
+        "fluxo_id": "101|193.136.0.1",
+        "datetime_utc": "2026-09-17T16:16:00Z",
+        "z_robusto": "2.0534",
+        "perda_pct": "0.00",
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 2,
+        "classe_verdadeira": "RISCO",
+        "classe_tarefa3": "OK",
+        "classe_tarefa4": "RISCO"
+      },
+      {
+        "caso": "Erro 1 da Tarefa 3 (FALHA de caminho curto por n5_timeout=4 que caía em OK)",
+        "fluxo_id": "101|194.109.133.10",
+        "datetime_utc": "2026-09-17T04:04:00Z",
+        "z_robusto": "1.4188",
+        "perda_pct": "0.00",
+        "n5_timeout": 4,
+        "n5_aumento80": 0,
+        "n5_risco": 0,
+        "classe_verdadeira": "FALHA",
+        "classe_tarefa3": "OK",
+        "classe_tarefa4": "FALHA"
+      },
+      {
+        "caso": "Erro 2 da Tarefa 3 (OK de pico isolado z=3.4410 que caía em FALHA)",
+        "fluxo_id": "102|194.109.133.10",
+        "datetime_utc": "2026-09-17T07:32:00Z",
+        "z_robusto": "3.4410",
+        "perda_pct": "0.00",
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 1,
+        "classe_verdadeira": "OK",
+        "classe_tarefa3": "FALHA",
+        "classe_tarefa4": "OK"
+      }
+    ]
+  }
+}
