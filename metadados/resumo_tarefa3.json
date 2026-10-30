@@ -1,0 +1,951 @@
+{
+  "contrato_tarefa2": {
+    "fichas_baseline_total": 67,
+    "fichas_elegiveis": 64,
+    "n_treino": 80386,
+    "n_validacao": 32148,
+    "n_teste_fechado": 48270,
+    "baseline_recalculado_com_b": false,
+    "teste_usado_na_escolha": false
+  },
+  "colunas": {
+    "colunas_modelo_x": [
+      "z_robusto",
+      "aumento_pct",
+      "jitter_relativo",
+      "perda_pct",
+      "timeout_atual",
+      "n5_timeout",
+      "n5_aumento80",
+      "n5_risco"
+    ],
+    "coluna_alvo_y": "classe",
+    "colunas_proibidas_excluidas": [
+      "timestamp",
+      "datetime_utc",
+      "fluxo_id",
+      "prb_id",
+      "dst_addr",
+      "sent",
+      "rcvd",
+      "avg_rtt_ms",
+      "jitter_ms",
+      "mediana_baseline_ms",
+      "mad_baseline_ms",
+      "jitter_tipico_ms",
+      "ordem_regra",
+      "split"
+    ],
+    "todas_colunas_csv_treino": [
+      "timestamp",
+      "datetime_utc",
+      "fluxo_id",
+      "prb_id",
+      "dst_addr",
+      "sent",
+      "rcvd",
+      "avg_rtt_ms",
+      "jitter_ms",
+      "mediana_baseline_ms",
+      "mad_baseline_ms",
+      "jitter_tipico_ms",
+      "z_robusto",
+      "aumento_pct",
+      "jitter_relativo",
+      "perda_pct",
+      "timeout_atual",
+      "n5_timeout",
+      "n5_aumento80",
+      "n5_risco",
+      "classe",
+      "ordem_regra",
+      "split"
+    ],
+    "medianas_imputacao_treino": {
+      "z_robusto": 0.4634,
+      "aumento_pct": 1.2828,
+      "jitter_relativo": 1.3039,
+      "perda_pct": 0.0,
+      "timeout_atual": 0.0,
+      "n5_timeout": 0.0,
+      "n5_aumento80": 0.0,
+      "n5_risco": 0.0
+    }
+  },
+  "arvore_oficial": {
+    "parametros": {
+      "algoritmo": "DecisionTreeClassifier (CART)",
+      "criterion": "gini",
+      "max_depth": 3,
+      "min_samples_leaf": 50,
+      "random_state": 42
+    },
+    "profundidade_maxima_pedida": 3,
+    "profundidade_real_obtida": 3,
+    "numero_folhas": 5,
+    "numero_nos_totais": 9,
+    "primeiras_divisoes": [
+      "Raiz (nível 0): z_robusto <= 3.4073 (se > 3.4073, vai para o ramo direito de desvio severo -> FALHA)",
+      "Nível 1 (ramo esquerdo, z_robusto <= 3.4073): perda_pct <= 16.6650% (se > 16.6650%, perda de 1 a 3 pacotes -> folha FALHA com 10.283 amostras de treino)",
+      "Nível 1 (ramo direito, z_robusto > 3.4073): z_robusto <= 3.6010 (ambas as folhas filhas classificam como FALHA, pois min_samples_leaf=50 impede isolar os 5 picos isolados de fronteira)",
+      "Nível 2 (ramo z_robusto <= 3.4073 e perda_pct <= 16.6650%): n5_aumento80 <= 1.5000 (se <= 1.5 -> folha OK com 48.623 amostras; se > 1.5 -> folha FALHA com 1.891 amostras)"
+    ],
+    "regras_portugues": [
+      {
+        "regra_pt": "Se z_robusto <= 3.4073 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000, então classe = OK",
+        "classe_folha": "OK",
+        "profundidade_folha": 3,
+        "n_treino": 48623,
+        "contagem_treino": {
+          "OK": 47000,
+          "RISCO": 251,
+          "FALHA": 1372
+        },
+        "impureza": 0.064822
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.4073 e perda_pct <= 16.6650 e n5_aumento80 > 1.5000, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 3,
+        "n_treino": 1891,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 1891
+        },
+        "impureza": 0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.4073 e perda_pct > 16.6650, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 2,
+        "n_treino": 10283,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 10283
+        },
+        "impureza": 0.0
+      },
+      {
+        "regra_pt": "Se z_robusto > 3.4073 e z_robusto <= 3.6010, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 2,
+        "n_treino": 50,
+        "contagem_treino": {
+          "OK": 5,
+          "RISCO": 1,
+          "FALHA": 44
+        },
+        "impureza": 0.2152
+      },
+      {
+        "regra_pt": "Se z_robusto > 3.4073 e z_robusto > 3.6010, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 2,
+        "n_treino": 19539,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19539
+        },
+        "impureza": 0.0
+      }
+    ],
+    "diagrama_texto": "|--- z_robusto <= 3.4073 (n=80386, gini=0.4882)\n|   |--- perda_pct <= 16.6650 (n=60797, gini=0.3527)\n|   |   |--- n5_aumento80 <= 1.5000 (n=50514, gini=0.1301)\n|   |   |   |--- classe: OK (n=48623, [OK=47000, RISCO=251, FALHA=1372], gini=0.0648)\n|   |   |--- n5_aumento80 >  1.5000\n|   |   |   |--- classe: FALHA (n=1891, [OK=0, RISCO=0, FALHA=1891], gini=0.0000)\n|   |--- perda_pct >  16.6650\n|   |   |--- classe: FALHA (n=10283, [OK=0, RISCO=0, FALHA=10283], gini=0.0000)\n|--- z_robusto >  3.4073\n|   |--- z_robusto <= 3.6010 (n=19589, gini=0.0006)\n|   |   |--- classe: FALHA (n=50, [OK=5, RISCO=1, FALHA=44], gini=0.2152)\n|   |--- z_robusto >  3.6010\n|   |   |--- classe: FALHA (n=19539, [OK=0, RISCO=0, FALHA=19539], gini=0.0000)",
+    "estrutura_nos": {
+      "depth": 0,
+      "n_samples": 80386,
+      "counts": [
+        47005,
+        252,
+        33129
+      ],
+      "counts_dict": {
+        "OK": 47005,
+        "RISCO": 252,
+        "FALHA": 33129
+      },
+      "impurity": 0.488222,
+      "criterion": "gini",
+      "pred_class": "OK",
+      "is_leaf": false,
+      "feature_idx": 0,
+      "feature": "z_robusto",
+      "threshold": 3.4073,
+      "impurity_gain": 0.221312,
+      "left": {
+        "depth": 1,
+        "n_samples": 60797,
+        "counts": [
+          47000,
+          251,
+          13546
+        ],
+        "counts_dict": {
+          "OK": 47000,
+          "RISCO": 251,
+          "FALHA": 13546
+        },
+        "impurity": 0.352711,
+        "criterion": "gini",
+        "pred_class": "OK",
+        "is_leaf": false,
+        "feature_idx": 3,
+        "feature": "perda_pct",
+        "threshold": 16.665,
+        "impurity_gain": 0.244622,
+        "left": {
+          "depth": 2,
+          "n_samples": 50514,
+          "counts": [
+            47000,
+            251,
+            3263
+          ],
+          "counts_dict": {
+            "OK": 47000,
+            "RISCO": 251,
+            "FALHA": 3263
+          },
+          "impurity": 0.130093,
+          "criterion": "gini",
+          "pred_class": "OK",
+          "is_leaf": false,
+          "feature_idx": 6,
+          "feature": "n5_aumento80",
+          "threshold": 1.5,
+          "impurity_gain": 0.067698,
+          "left": {
+            "depth": 3,
+            "n_samples": 48623,
+            "counts": [
+              47000,
+              251,
+              1372
+            ],
+            "counts_dict": {
+              "OK": 47000,
+              "RISCO": 251,
+              "FALHA": 1372
+            },
+            "impurity": 0.064822,
+            "criterion": "gini",
+            "pred_class": "OK",
+            "is_leaf": true
+          },
+          "right": {
+            "depth": 3,
+            "n_samples": 1891,
+            "counts": [
+              0,
+              0,
+              1891
+            ],
+            "counts_dict": {
+              "OK": 0,
+              "RISCO": 0,
+              "FALHA": 1891
+            },
+            "impurity": 0.0,
+            "criterion": "gini",
+            "pred_class": "FALHA",
+            "is_leaf": true
+          }
+        },
+        "right": {
+          "depth": 2,
+          "n_samples": 10283,
+          "counts": [
+            0,
+            0,
+            10283
+          ],
+          "counts_dict": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 10283
+          },
+          "impurity": 0.0,
+          "criterion": "gini",
+          "pred_class": "FALHA",
+          "is_leaf": true
+        }
+      },
+      "right": {
+        "depth": 1,
+        "n_samples": 19589,
+        "counts": [
+          5,
+          1,
+          19583
+        ],
+        "counts_dict": {
+          "OK": 5,
+          "RISCO": 1,
+          "FALHA": 19583
+        },
+        "impurity": 0.000612,
+        "criterion": "gini",
+        "pred_class": "FALHA",
+        "is_leaf": false,
+        "feature_idx": 0,
+        "feature": "z_robusto",
+        "threshold": 3.601,
+        "impurity_gain": 6.3e-05,
+        "left": {
+          "depth": 2,
+          "n_samples": 50,
+          "counts": [
+            5,
+            1,
+            44
+          ],
+          "counts_dict": {
+            "OK": 5,
+            "RISCO": 1,
+            "FALHA": 44
+          },
+          "impurity": 0.2152,
+          "criterion": "gini",
+          "pred_class": "FALHA",
+          "is_leaf": true
+        },
+        "right": {
+          "depth": 2,
+          "n_samples": 19539,
+          "counts": [
+            0,
+            0,
+            19539
+          ],
+          "counts_dict": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 19539
+          },
+          "impurity": 0.0,
+          "criterion": "gini",
+          "pred_class": "FALHA",
+          "is_leaf": true
+        }
+      }
+    }
+  },
+  "grade_validacao": [
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 2,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9558,
+      "f1_macro_val": 0.6373,
+      "f1_ok": 0.9639,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9479,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 2,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9558,
+      "f1_macro_val": 0.6373,
+      "f1_ok": 0.9639,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9479,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 2,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9558,
+      "f1_macro_val": 0.6373,
+      "f1_ok": 0.9639,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9479,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 3,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9803,
+      "f1_macro_val": 0.6546,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9803,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 3,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9803,
+      "f1_macro_val": 0.6546,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9803,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 3,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9803,
+      "f1_macro_val": 0.6546,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9803,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 4,
+      "n_folhas": 6,
+      "n_nos": 11,
+      "acuracia_val": 0.9958,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9965,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9999,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 4,
+      "n_folhas": 6,
+      "n_nos": 11,
+      "acuracia_val": 0.9958,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9965,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9999,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "gini",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 4,
+      "n_folhas": 6,
+      "n_nos": 11,
+      "acuracia_val": 0.9958,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9965,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9999,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 2,
+      "n_folhas": 3,
+      "n_nos": 5,
+      "acuracia_val": 0.9559,
+      "f1_macro_val": 0.6374,
+      "f1_ok": 0.964,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9481,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 2,
+      "n_folhas": 3,
+      "n_nos": 5,
+      "acuracia_val": 0.9559,
+      "f1_macro_val": 0.6374,
+      "f1_ok": 0.964,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9481,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 2,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 2,
+      "n_folhas": 3,
+      "n_nos": 5,
+      "acuracia_val": 0.9559,
+      "f1_macro_val": 0.6374,
+      "f1_ok": 0.964,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9481,
+      "recall_falha": 0.9012,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 3,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9804,
+      "f1_macro_val": 0.6547,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9805,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 3,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9804,
+      "f1_macro_val": 0.6547,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9805,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 3,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 3,
+      "n_folhas": 4,
+      "n_nos": 7,
+      "acuracia_val": 0.9804,
+      "f1_macro_val": 0.6547,
+      "f1_ok": 0.9836,
+      "f1_risco": 0.0,
+      "f1_falha": 0.9805,
+      "recall_falha": 0.9617,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 20,
+      "profundidade_obtida": 4,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9959,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9966,
+      "f1_risco": 0.0,
+      "f1_falha": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 50,
+      "profundidade_obtida": 4,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9959,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9966,
+      "f1_risco": 0.0,
+      "f1_falha": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    },
+    {
+      "criterion": "entropy",
+      "max_depth_pedido": 4,
+      "min_samples_leaf": 100,
+      "profundidade_obtida": 4,
+      "n_folhas": 5,
+      "n_nos": 9,
+      "acuracia_val": 0.9959,
+      "f1_macro_val": 0.6655,
+      "f1_ok": 0.9966,
+      "f1_risco": 0.0,
+      "f1_falha": 1.0,
+      "recall_falha": 1.0,
+      "recall_risco": 0.0
+    }
+  ],
+  "avaliacao_treino_oficial": {
+    "matriz_confusao": {
+      "OK": {
+        "OK": 47000,
+        "RISCO": 0,
+        "FALHA": 5
+      },
+      "RISCO": {
+        "OK": 251,
+        "RISCO": 0,
+        "FALHA": 1
+      },
+      "FALHA": {
+        "OK": 1372,
+        "RISCO": 0,
+        "FALHA": 31757
+      }
+    },
+    "por_classe": {
+      "OK": {
+        "precisao": 0.9666,
+        "recall": 0.9999,
+        "f1": 0.983,
+        "suporte": 47005
+      },
+      "RISCO": {
+        "precisao": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "suporte": 252
+      },
+      "FALHA": {
+        "precisao": 0.9998,
+        "recall": 0.9586,
+        "f1": 0.9788,
+        "suporte": 33129
+      }
+    },
+    "f1_macro": 0.6539,
+    "balanced_accuracy": 0.6528,
+    "acuracia": 0.9797,
+    "total_amostras": 80386,
+    "total_erros": 1629
+  },
+  "avaliacao_validacao_oficial": {
+    "matriz_confusao": {
+      "OK": {
+        "OK": 18972,
+        "RISCO": 0,
+        "FALHA": 3
+      },
+      "RISCO": {
+        "OK": 131,
+        "RISCO": 0,
+        "FALHA": 0
+      },
+      "FALHA": {
+        "OK": 500,
+        "RISCO": 0,
+        "FALHA": 12542
+      }
+    },
+    "por_classe": {
+      "OK": {
+        "precisao": 0.9678,
+        "recall": 0.9998,
+        "f1": 0.9836,
+        "suporte": 18975
+      },
+      "RISCO": {
+        "precisao": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "suporte": 131
+      },
+      "FALHA": {
+        "precisao": 0.9998,
+        "recall": 0.9617,
+        "f1": 0.9803,
+        "suporte": 13042
+      }
+    },
+    "f1_macro": 0.6546,
+    "balanced_accuracy": 0.6538,
+    "acuracia": 0.9803,
+    "total_amostras": 32148,
+    "total_erros": 634
+  },
+  "auditoria_erros_validacao": {
+    "contagem_erros_por_regra": {
+      "FALHA->OK (2_n5_timeout>=3)": 500,
+      "RISCO->OK (5_risco_persistente)": 131,
+      "OK->FALHA (6_ok)": 3
+    },
+    "caminho_longo_estavel_ok_total_val": 4530,
+    "caminho_longo_estavel_ok_caiu_em_falha_val": 0,
+    "total_falha_curto_caiu_em_ok_val": 101,
+    "exemplo_erro_1_falha_curto_em_ok": {
+      "fluxo_id": "101|194.109.133.10",
+      "rota": "DE->DE",
+      "escopo": "curto",
+      "timestamp": 1789617840,
+      "datetime_utc": "2026-09-17T04:04:00Z",
+      "avg_rtt_ms": "15.32",
+      "mediana_baseline_ms": "14.1000",
+      "z_robusto": "1.4188",
+      "aumento_pct": "8.6525",
+      "jitter_relativo": "1.5784",
+      "perda_pct": "0.00",
+      "timeout_atual": 0,
+      "n5_timeout": 4,
+      "n5_aumento80": 0,
+      "n5_risco": 0,
+      "ordem_regra": "2_n5_timeout>=3",
+      "classe_verdadeira": "FALHA",
+      "classe_arvore": "OK"
+    },
+    "exemplo_erro_2_pico_isolado_ok_em_falha": {
+      "fluxo_id": "102|194.109.133.10",
+      "rota": "DE->DE",
+      "escopo": "curto",
+      "timestamp": 1789630320,
+      "datetime_utc": "2026-09-17T07:32:00Z",
+      "avg_rtt_ms": "17.14",
+      "mediana_baseline_ms": "14.1300",
+      "z_robusto": "3.4410",
+      "aumento_pct": "21.3022",
+      "jitter_relativo": "2.8824",
+      "perda_pct": "0.00",
+      "timeout_atual": 0,
+      "n5_timeout": 0,
+      "n5_aumento80": 0,
+      "n5_risco": 1,
+      "ordem_regra": "6_ok",
+      "classe_verdadeira": "OK",
+      "classe_arvore": "FALHA"
+    },
+    "exemplo_erro_3_risco_em_ok": {
+      "fluxo_id": "101|193.136.0.1",
+      "rota": "DE->PT",
+      "escopo": "regional",
+      "timestamp": 1789661760,
+      "datetime_utc": "2026-09-17T16:16:00Z",
+      "avg_rtt_ms": "52.32",
+      "mediana_baseline_ms": "48.2100",
+      "z_robusto": "2.0534",
+      "aumento_pct": "8.5252",
+      "jitter_relativo": "0.6100",
+      "perda_pct": "0.00",
+      "timeout_atual": 0,
+      "n5_timeout": 0,
+      "n5_aumento80": 0,
+      "n5_risco": 2,
+      "ordem_regra": "5_risco_persistente",
+      "classe_verdadeira": "RISCO",
+      "classe_arvore": "OK"
+    },
+    "todos_erros_ok_em_falha": [
+      {
+        "fluxo_id": "102|194.109.133.10",
+        "rota": "DE->DE",
+        "escopo": "curto",
+        "timestamp": 1789630320,
+        "datetime_utc": "2026-09-17T07:32:00Z",
+        "avg_rtt_ms": "17.14",
+        "mediana_baseline_ms": "14.1300",
+        "z_robusto": "3.4410",
+        "aumento_pct": "21.3022",
+        "jitter_relativo": "2.8824",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 1,
+        "ordem_regra": "6_ok",
+        "classe_verdadeira": "OK",
+        "classe_arvore": "FALHA"
+      },
+      {
+        "fluxo_id": "202|170.210.0.1",
+        "rota": "AR->AR",
+        "escopo": "curto",
+        "timestamp": 1789585680,
+        "datetime_utc": "2026-09-16T19:08:00Z",
+        "avg_rtt_ms": "12.36",
+        "mediana_baseline_ms": "10.3100",
+        "z_robusto": "3.4568",
+        "aumento_pct": "19.8836",
+        "jitter_relativo": "2.4747",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 1,
+        "ordem_regra": "6_ok",
+        "classe_verdadeira": "OK",
+        "classe_arvore": "FALHA"
+      },
+      {
+        "fluxo_id": "602|202.157.0.1",
+        "rota": "IN->SG",
+        "escopo": "regional",
+        "timestamp": 1789604160,
+        "datetime_utc": "2026-09-17T00:16:00Z",
+        "avg_rtt_ms": "84.70",
+        "mediana_baseline_ms": "74.7700",
+        "z_robusto": "3.4172",
+        "aumento_pct": "13.2807",
+        "jitter_relativo": "0.6733",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 1,
+        "ordem_regra": "6_ok",
+        "classe_verdadeira": "OK",
+        "classe_arvore": "FALHA"
+      }
+    ]
+  },
+  "arvore_contraste": {
+    "declaracao_descarte": "Árvore treinada exclusivamente para contraste didático. Fica estritamente FORA da entrega final e do modelo oficial do projeto.",
+    "contraste_rtt_e_rota": {
+      "features": [
+        "avg_rtt_ms",
+        "perda_pct",
+        "rota_id_num"
+      ],
+      "max_depth": 4,
+      "min_samples_leaf": 50,
+      "divisoes_raiz_e_topo": [
+        "Raiz (nível 0): perda_pct <= 16.6650%",
+        "Nível 1 (logo abaixo da raiz): avg_rtt_ms <= 356.2850 ms (corte fixo em milissegundos no RTT absoluto -> tudo acima de 356,29 ms vira FALHA)",
+        "Nível 2: avg_rtt_ms <= 328.8950 ms",
+        "Nível 3: avg_rtt_ms <= 96.8150 ms (se 96,82 < avg_rtt_ms <= 328,90 ms -> folha FALHA, condenando 1.825 medições saudáveis OK da rota longa BR->JP na validação; se <= 96,82 ms -> folha OK, mascarando 1.448 FALHAs de rotas curtas na validação!)"
+      ],
+      "diagrama_texto": "|--- perda_pct <= 16.6650 (n=80386, gini=0.4882)\n|   |--- avg_rtt_ms <= 356.2850 (n=70047, gini=0.4438)\n|   |   |--- avg_rtt_ms <= 328.8950 (n=66618, gini=0.4177)\n|   |   |   |--- avg_rtt_ms <= 96.8150 (n=58681, gini=0.4410)\n|   |   |   |   |--- classe: OK (n=46701, [OK=35171, RISCO=170, FALHA=11360], gini=0.3736)\n|   |   |   |--- avg_rtt_ms >  96.8150\n|   |   |   |   |--- classe: FALHA (n=11980, [OK=4446, RISCO=44, FALHA=7490], gini=0.4714)\n|   |   |--- avg_rtt_ms >  328.8950\n|   |   |   |--- avg_rtt_ms <= 352.4550 (n=7937, gini=0.1298)\n|   |   |   |   |--- classe: OK (n=7832, [OK=7326, RISCO=23, FALHA=483], gini=0.1212)\n|   |   |   |--- avg_rtt_ms >  352.4550\n|   |   |   |   |--- classe: OK (n=105, [OK=60, RISCO=13, FALHA=32], gini=0.5653)\n|   |--- avg_rtt_ms >  356.2850\n|   |   |--- avg_rtt_ms <= 357.2350 (n=3429, gini=0.0023)\n|   |   |   |--- classe: FALHA (n=89, [OK=2, RISCO=2, FALHA=85], gini=0.0869)\n|   |   |--- avg_rtt_ms >  357.2350\n|   |   |   |--- classe: FALHA (n=3340, [OK=0, RISCO=0, FALHA=3340], gini=0.0000)\n|--- perda_pct >  16.6650\n|   |--- classe: FALHA (n=10339, [OK=0, RISCO=0, FALHA=10339], gini=0.0000)",
+      "avaliacao_validacao": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 17260,
+            "RISCO": 0,
+            "FALHA": 1715
+          },
+          "RISCO": {
+            "OK": 114,
+            "RISCO": 0,
+            "FALHA": 17
+          },
+          "FALHA": {
+            "OK": 4591,
+            "RISCO": 0,
+            "FALHA": 8451
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 0.7858,
+            "recall": 0.9096,
+            "f1": 0.8432,
+            "suporte": 18975
+          },
+          "RISCO": {
+            "precisao": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "suporte": 131
+          },
+          "FALHA": {
+            "precisao": 0.8299,
+            "recall": 0.648,
+            "f1": 0.7278,
+            "suporte": 13042
+          }
+        },
+        "f1_macro": 0.5237,
+        "balanced_accuracy": 0.5192,
+        "acuracia": 0.7998,
+        "total_amostras": 32148,
+        "total_erros": 6437
+      },
+      "longo_ok_caiu_em_falha_val": 1695,
+      "curto_falha_caiu_em_ok_val": 1973
+    },
+    "contraste_ms_na_raiz": {
+      "features": [
+        "avg_rtt_ms",
+        "jitter_ms",
+        "perda_pct",
+        "rota_id_num"
+      ],
+      "max_depth": 3,
+      "min_samples_leaf": 50,
+      "divisoes_raiz_e_topo": [
+        "Raiz (nível 0): jitter_ms <= 1.8050 ms (corte fixo em milissegundos diretamente na raiz)",
+        "Nível 1 (ramo direito): avg_rtt_ms <= 12.3550 ms (corte fixo em milissegundos de RTT absoluto)"
+      ],
+      "diagrama_texto": "|--- jitter_ms <= 1.8050 (n=80386, gini=0.4882)\n|   |--- perda_pct <= 16.6650 (n=61256, gini=0.3590)\n|   |   |--- avg_rtt_ms <= 356.5900 (n=52800, gini=0.1966)\n|   |   |   |--- classe: OK (n=52374, [OK=46998, RISCO=250, FALHA=5126], gini=0.1852)\n|   |   |--- avg_rtt_ms >  356.5900\n|   |   |   |--- classe: FALHA (n=426, [OK=1, RISCO=2, FALHA=423], gini=0.0140)\n|   |--- perda_pct >  16.6650\n|   |   |--- classe: FALHA (n=8456, [OK=0, RISCO=0, FALHA=8456], gini=0.0000)\n|--- jitter_ms >  1.8050\n|   |--- avg_rtt_ms <= 12.3550 (n=19130, gini=0.0006)\n|   |   |--- avg_rtt_ms <= 11.0500 (n=188, gini=0.0314)\n|   |   |   |--- classe: FALHA (n=138, [OK=0, RISCO=0, FALHA=138], gini=0.0000)\n|   |   |--- avg_rtt_ms >  11.0500\n|   |   |   |--- classe: FALHA (n=50, [OK=3, RISCO=0, FALHA=47], gini=0.1128)\n|   |--- avg_rtt_ms >  12.3550\n|   |   |--- jitter_ms <= 2.8250 (n=18942, gini=0.0003)\n|   |   |   |--- classe: FALHA (n=3726, [OK=3, RISCO=0, FALHA=3723], gini=0.0016)\n|   |   |--- jitter_ms >  2.8250\n|   |   |   |--- classe: FALHA (n=15216, [OK=0, RISCO=0, FALHA=15216], gini=0.0000)",
+      "avaliacao_validacao": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 18971,
+            "RISCO": 0,
+            "FALHA": 4
+          },
+          "RISCO": {
+            "OK": 130,
+            "RISCO": 0,
+            "FALHA": 1
+          },
+          "FALHA": {
+            "OK": 2017,
+            "RISCO": 0,
+            "FALHA": 11025
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 0.8983,
+            "recall": 0.9998,
+            "f1": 0.9463,
+            "suporte": 18975
+          },
+          "RISCO": {
+            "precisao": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "suporte": 131
+          },
+          "FALHA": {
+            "precisao": 0.9995,
+            "recall": 0.8453,
+            "f1": 0.916,
+            "suporte": 13042
+          }
+        },
+        "f1_macro": 0.6208,
+        "balanced_accuracy": 0.615,
+        "acuracia": 0.9331,
+        "total_amostras": 32148,
+        "total_erros": 2152
+      }
+    }
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "parametros": {
+    "algoritmo": "DecisionTreeClassifier (CART)",
+    "criterion": "gini",
+    "max_depth": 3,
+    "min_samples_leaf": 50,
+    "random_state": 42
+  },
+  "profundidade_maxima_pedida": 3,
+  "profundidade_real_obtida": 3,
+  "numero_folhas": 5,
+  "numero_nos_totais": 9,
+  "primeiras_divisoes": [
+    "Raiz (nível 0): z_robusto <= 3.4073 (se > 3.4073, vai para o ramo direito de desvio severo -> FALHA)",
+    "Nível 1 (ramo esquerdo, z_robusto <= 3.4073): perda_pct <= 16.6650% (se > 16.6650%, perda de 1 a 3 pacotes -> folha FALHA com 10.283 amostras de treino)",
+    "Nível 1 (ramo direito, z_robusto > 3.4073): z_robusto <= 3.6010 (ambas as folhas filhas classificam como FALHA, pois min_samples_leaf=50 impede isolar os 5 picos isolados de fronteira)",
+    "Nível 2 (ramo z_robusto <= 3.4073 e perda_pct <= 16.6650%): n5_aumento80 <= 1.5000 (se <= 1.5 -> folha OK com 48.623 amostras; se > 1.5 -> folha FALHA com 1.891 amostras)"
+  ],
+  "regras_portugues": [
+    {
+      "regra_pt": "Se z_robusto <= 3.4073 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000, então classe = OK",
+      "classe_folha": "OK",
+      "profundidade_folha": 3,
+      "n_treino": 48623,
+      "contagem_treino": {
+        "OK": 47000,
+        "RISCO": 251,
+        "FALHA": 1372
+      },
+      "impureza": 0.064822
+    },
+    {
+      "regra_pt": "Se z_robusto <= 3.4073 e perda_pct <= 16.6650 e n5_aumento80 > 1.5000, então classe = FALHA",
+      "classe_folha": "FALHA",
+      "profundidade_folha": 3,
+      "n_treino": 1891,
+      "contagem_treino": {
+        "OK": 0,
+        "RISCO": 0,
+        "FALHA": 1891
+      },
+      "impureza": 0.0
+    },
+    {
+      "regra_pt": "Se z_robusto <= 3.4073 e perda_pct > 16.6650, então classe = FALHA",
+      "classe_folha": "FALHA",
+      "profundidade_folha": 2,
+      "n_treino": 10283,
+      "contagem_treino": {
+        "OK": 0,
+        "RISCO": 0,
+        "FALHA": 10283
+      },
+      "impureza": 0.0
+    },
+    {
+      "regra_pt": "Se z_robusto > 3.4073 e z_robusto <= 3.6010, então classe = FALHA",
+      "classe_folha": "FALHA",
+      "profundidade_folha": 2,
+      "n_treino": 50,
+      "contagem_treino": {
+        "OK": 5,
+        "RISCO": 1,
+        "FALHA": 44
+      },
+      "impureza": 0.2152
+    },
+    {
+      "regra_pt": "Se z_robusto > 3.4073 e z_robusto > 3.6010, então classe = FALHA",
+      "classe_folha": "FALHA",
+      "profundidade_folha": 2,
+      "n_treino": 19539,
+      "contagem_treino": {
+        "OK": 0,
+        "RISCO": 0,
+        "FALHA": 19539
+      },
+      "impureza": 0.0
+    }
+  ],
+  "diagrama_texto": "|--- z_robusto <= 3.4073 (n=80386, gini=0.4882)\n|   |--- perda_pct <= 16.6650 (n=60797, gini=0.3527)\n|   |   |--- n5_aumento80 <= 1.5000 (n=50514, gini=0.1301)\n|   |   |   |--- classe: OK (n=48623, [OK=47000, RISCO=251, FALHA=1372], gini=0.0648)\n|   |   |--- n5_aumento80 >  1.5000\n|   |   |   |--- classe: FALHA (n=1891, [OK=0, RISCO=0, FALHA=1891], gini=0.0000)\n|   |--- perda_pct >  16.6650\n|   |   |--- classe: FALHA (n=10283, [OK=0, RISCO=0, FALHA=10283], gini=0.0000)\n|--- z_robusto >  3.4073\n|   |--- z_robusto <= 3.6010 (n=19589, gini=0.0006)\n|   |   |--- classe: FALHA (n=50, [OK=5, RISCO=1, FALHA=44], gini=0.2152)\n|   |--- z_robusto >  3.6010\n|   |   |--- classe: FALHA (n=19539, [OK=0, RISCO=0, FALHA=19539], gini=0.0000)",
+  "estrutura_nos": {
+    "depth": 0,
+    "n_samples": 80386,
+    "counts": [
+      47005,
+      252,
+      33129
+    ],
+    "counts_dict": {
+      "OK": 47005,
+      "RISCO": 252,
+      "FALHA": 33129
+    },
+    "impurity": 0.488222,
+    "criterion": "gini",
+    "pred_class": "OK",
+    "is_leaf": false,
+    "feature_idx": 0,
+    "feature": "z_robusto",
+    "threshold": 3.4073,
+    "impurity_gain": 0.221312,
+    "left": {
+      "depth": 1,
+      "n_samples": 60797,
+      "counts": [
+        47000,
+        251,
+        13546
+      ],
+      "counts_dict": {
+        "OK": 47000,
+        "RISCO": 251,
+        "FALHA": 13546
+      },
+      "impurity": 0.352711,
+      "criterion": "gini",
+      "pred_class": "OK",
+      "is_leaf": false,
+      "feature_idx": 3,
+      "feature": "perda_pct",
+      "threshold": 16.665,
+      "impurity_gain": 0.244622,
+      "left": {
+        "depth": 2,
+        "n_samples": 50514,
+        "counts": [
+          47000,
+          251,
+          3263
+        ],
+        "counts_dict": {
+          "OK": 47000,
+          "RISCO": 251,
+          "FALHA": 3263
+        },
+        "impurity": 0.130093,
+        "criterion": "gini",
+        "pred_class": "OK",
+        "is_leaf": false,
+        "feature_idx": 6,
+        "feature": "n5_aumento80",
+        "threshold": 1.5,
+        "impurity_gain": 0.067698,
+        "left": {
+          "depth": 3,
+          "n_samples": 48623,
+          "counts": [
+            47000,
+            251,
+            1372
+          ],
+          "counts_dict": {
+            "OK": 47000,
+            "RISCO": 251,
+            "FALHA": 1372
+          },
+          "impurity": 0.064822,
+          "criterion": "gini",
+          "pred_class": "OK",
+          "is_leaf": true
+        },
+        "right": {
+          "depth": 3,
+          "n_samples": 1891,
+          "counts": [
+            0,
+            0,
+            1891
+          ],
+          "counts_dict": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 1891
+          },
+          "impurity": 0.0,
+          "criterion": "gini",
+          "pred_class": "FALHA",
+          "is_leaf": true
+        }
+      },
+      "right": {
+        "depth": 2,
+        "n_samples": 10283,
+        "counts": [
+          0,
+          0,
+          10283
+        ],
+        "counts_dict": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 10283
+        },
+        "impurity": 0.0,
+        "criterion": "gini",
+        "pred_class": "FALHA",
+        "is_leaf": true
+      }
+    },
+    "right": {
+      "depth": 1,
+      "n_samples": 19589,
+      "counts": [
+        5,
+        1,
+        19583
+      ],
+      "counts_dict": {
+        "OK": 5,
+        "RISCO": 1,
+        "FALHA": 19583
+      },
+      "impurity": 0.000612,
+      "criterion": "gini",
+      "pred_class": "FALHA",
+      "is_leaf": false,
+      "feature_idx": 0,
+      "feature": "z_robusto",
+      "threshold": 3.601,
+      "impurity_gain": 6.3e-05,
+      "left": {
+        "depth": 2,
+        "n_samples": 50,
+        "counts": [
+          5,
+          1,
+          44
+        ],
+        "counts_dict": {
+          "OK": 5,
+          "RISCO": 1,
+          "FALHA": 44
+        },
+        "impurity": 0.2152,
+        "criterion": "gini",
+        "pred_class": "FALHA",
+        "is_leaf": true
+      },
+      "right": {
+        "depth": 2,
+        "n_samples": 19539,
+        "counts": [
+          0,
+          0,
+          19539
+        ],
+        "counts_dict": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19539
+        },
+        "impurity": 0.0,
+        "criterion": "gini",
+        "pred_class": "FALHA",
+        "is_leaf": true
+      }
+    }
+  }
+}
