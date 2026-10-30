@@ -1,4 +1,5 @@
 *.csv
+!data/processed/baseline_por_fluxo.csv
 *.parquet
 *.zip
 data/raw/*.json

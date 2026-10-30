@@ -23,7 +23,7 @@
 | | Artefato | Quem usa depois |
 |---|---|---|
 | **Entra** | Memorando de decisão de fontes de dados e especificações da disciplina | — |
-| **Sai** | Notebook oficial executado ([`2_Coleta_de_dados.ipynb`](../2_Coleta_de_dados.ipynb)) com dados brutos | Tarefa 2 e avaliação docente |
+| **Sai** | Notebook oficial executado ([`2_Coleta_de_dados.ipynb`](../notebooks/2_Coleta_de_dados.ipynb)) com dados brutos | Tarefa 2 e avaliação docente |
 | **Sai** | Arquivo de metadados da coleta ([`data/raw/ripe_atlas_m1001_20260916T015838Z_metadata.json`](../data/raw/ripe_atlas_m1001_20260916T015838Z_metadata.json)) | Tarefa 2 e repositório Git |
 | **Sai** | Tríade de arquivos brutos preservada no ambiente (`.json`, `.csv`, `_metadata.json`) | Tarefa 2 **é obrigada a usar este bruto** |
 | **Sai** | Este diário de bordo com as contribuições individuais e respostas à correção | Tarefas seguintes |
@@ -149,7 +149,7 @@ Cada registro bruto guarda, conforme retornado pela API:
 
 ## 6. Evidências gerais
 
-- **Notebook Oficial da Coleta:** [`2_Coleta_de_dados.ipynb`](../2_Coleta_de_dados.ipynb)
+- **Notebook Oficial da Coleta:** [`2_Coleta_de_dados.ipynb`](../notebooks/2_Coleta_de_dados.ipynb)
 - **Metadados Versionados da Ingestão:** [`data/raw/ripe_atlas_m1001_20260916T015838Z_metadata.json`](../data/raw/ripe_atlas_m1001_20260916T015838Z_metadata.json)
 - **Memorando Prévio de Decisão:** [`README.md`](../README.md)
 - **Parecer e Correção Docente Atendida:** [`Correcao_Grupo42.md`](../../Correcao_Grupo42.md)

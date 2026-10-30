@@ -1,0 +1,313 @@
+{
+  "bruto": {
+    "total_linhas": 336326,
+    "total_fluxos": 67,
+    "total_probes": 18,
+    "total_destinos": 25,
+    "duplicatas": 0,
+    "avg_nulos": 19964,
+    "avg_zeros": 0,
+    "linhas_periodo_a": 167962,
+    "linhas_periodo_b": 168364,
+    "timestamps_compartilhados_ab": 0
+  },
+  "baseline": {
+    "fluxos_com_ficha": 64,
+    "fluxos_excluidos": 3,
+    "detalhes_excluidos": [
+      [
+        "301|170.81.100.114",
+        2156,
+        262,
+        0.1215,
+        "BR->BR_FAIL"
+      ],
+      [
+        "302|170.81.100.114",
+        2520,
+        300,
+        0.119,
+        "BR->BR_FAIL"
+      ],
+      [
+        "303|170.81.100.114",
+        2520,
+        299,
+        0.1187,
+        "BR->BR_FAIL"
+      ]
+    ],
+    "exemplo_curto_ar": {
+      "fluxo_id": "201|200.0.206.1",
+      "mediana": 10.3,
+      "MAD": 0.379999999999999,
+      "IQR": 0.75,
+      "jitter_tipico": 1.0,
+      "perda_tipica": 0.0,
+      "prop_resposta": 0.9901,
+      "total_amostras_a": 2515,
+      "amostras_validas_a": 2490,
+      "rota_auditoria": "AR->AR",
+      "escopo_auditoria": "curto"
+    },
+    "exemplo_curto_de": {
+      "fluxo_id": "101|194.109.133.10",
+      "mediana": 14.1,
+      "MAD": 0.5800000000000001,
+      "IQR": 1.1500000000000004,
+      "jitter_tipico": 1.02,
+      "perda_tipica": 0.0,
+      "prop_resposta": 0.9936,
+      "total_amostras_a": 2515,
+      "amostras_validas_a": 2499,
+      "rota_auditoria": "DE->DE",
+      "escopo_auditoria": "curto"
+    },
+    "exemplo_longo_jp": {
+      "fluxo_id": "301|203.178.136.1",
+      "mediana": 277.22,
+      "MAD": 2.159999999999968,
+      "IQR": 4.350000000000023,
+      "jitter_tipico": 1.03,
+      "perda_tipica": 0.0,
+      "prop_resposta": 0.9916,
+      "total_amostras_a": 2512,
+      "amostras_validas_a": 2491,
+      "rota_auditoria": "BR->JP",
+      "escopo_auditoria": "longo"
+    },
+    "exemplo_longo_za": {
+      "fluxo_id": "301|196.24.0.1",
+      "mediana": 344.17,
+      "MAD": 2.8499999999999943,
+      "IQR": 5.7099999999999795,
+      "jitter_tipico": 1.0,
+      "perda_tipica": 0.0,
+      "prop_resposta": 0.9924,
+      "total_amostras_a": 2513,
+      "amostras_validas_a": 2494,
+      "rota_auditoria": "BR->ZA",
+      "escopo_auditoria": "longo"
+    }
+  },
+  "rotulagem_b": {
+    "total_rotulado_b": 160804,
+    "linhas_excluidas_b": 7560,
+    "contagem_classes": {
+      "FALHA": 65949,
+      "OK": 94283,
+      "RISCO": 572
+    },
+    "proporcao_classes_pct": {
+      "FALHA": 41.01,
+      "OK": 58.63,
+      "RISCO": 0.36
+    },
+    "contagem_regras": {
+      "3_z_robusto>=3.5": 38707,
+      "6_ok": 94283,
+      "4_n5_aumento80>=2": 3955,
+      "1_perda_pct>=10": 20237,
+      "2_n5_timeout>=3": 3050,
+      "5_risco_persistente": 572
+    },
+    "abs_vs_rel": {
+      "RISCO_ABS__FALHA": 19802,
+      "OK_ABS__OK": 25797,
+      "RISCO_ABS__OK": 45213,
+      "FALHA_ABS__FALHA": 35658,
+      "OK_ABS__FALHA": 10489,
+      "RISCO_ABS__RISCO": 317,
+      "OK_ABS__RISCO": 100,
+      "FALHA_ABS__OK": 23273,
+      "FALHA_ABS__RISCO": 155
+    },
+    "exemplos_auditaveis": {
+      "ok_longo": {
+        "timestamp": 1789274400,
+        "datetime_utc": "2026-09-13T04:40:00Z",
+        "fluxo_id": "301|14.139.0.1",
+        "prb_id": "301",
+        "dst_addr": "14.139.0.1",
+        "sent": 3,
+        "rcvd": 3,
+        "avg_rtt_ms": "339.19",
+        "jitter_ms": "0.97",
+        "mediana_baseline_ms": "339.2500",
+        "mad_baseline_ms": "2.5400",
+        "jitter_tipico_ms": "1.0300",
+        "z_robusto": "-0.0159",
+        "aumento_pct": "-0.0177",
+        "jitter_relativo": "0.9417",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 0,
+        "classe": "OK",
+        "ordem_regra": "6_ok",
+        "split": "treino",
+        "rota": "BR->IN",
+        "escopo": "longo"
+      },
+      "risco": {
+        "timestamp": 1789482720,
+        "datetime_utc": "2026-09-15T14:32:00Z",
+        "fluxo_id": "101|193.136.0.1",
+        "prb_id": "101",
+        "dst_addr": "193.136.0.1",
+        "sent": 3,
+        "rcvd": 3,
+        "avg_rtt_ms": "52.68",
+        "jitter_ms": "0.40",
+        "mediana_baseline_ms": "48.2100",
+        "mad_baseline_ms": "1.3500",
+        "jitter_tipico_ms": "1.0000",
+        "z_robusto": "2.2333",
+        "aumento_pct": "9.2719",
+        "jitter_relativo": "0.4000",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 3,
+        "classe": "RISCO",
+        "ordem_regra": "5_risco_persistente",
+        "split": "treino",
+        "rota": "DE->PT",
+        "escopo": "regional"
+      },
+      "falha_curto": {
+        "timestamp": 1789279920,
+        "datetime_utc": "2026-09-13T06:12:00Z",
+        "fluxo_id": "101|194.109.133.10",
+        "prb_id": "101",
+        "dst_addr": "194.109.133.10",
+        "sent": 3,
+        "rcvd": 3,
+        "avg_rtt_ms": "31.62",
+        "jitter_ms": "4.15",
+        "mediana_baseline_ms": "14.1000",
+        "mad_baseline_ms": "0.5800",
+        "jitter_tipico_ms": "1.0200",
+        "z_robusto": "20.3743",
+        "aumento_pct": "124.2553",
+        "jitter_relativo": "4.0686",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 1,
+        "n5_risco": 1,
+        "classe": "FALHA",
+        "ordem_regra": "3_z_robusto>=3.5",
+        "split": "treino",
+        "rota": "DE->DE",
+        "escopo": "curto"
+      },
+      "falha_timeout": {
+        "timestamp": 1789292880,
+        "datetime_utc": "2026-09-13T09:48:00Z",
+        "fluxo_id": "101|193.136.0.1",
+        "prb_id": "101",
+        "dst_addr": "193.136.0.1",
+        "sent": 3,
+        "rcvd": 0,
+        "avg_rtt_ms": "",
+        "jitter_ms": "",
+        "mediana_baseline_ms": "48.2100",
+        "mad_baseline_ms": "1.3500",
+        "jitter_tipico_ms": "1.0000",
+        "z_robusto": "",
+        "aumento_pct": "",
+        "jitter_relativo": "",
+        "perda_pct": "100.00",
+        "timeout_atual": 1,
+        "n5_timeout": 3,
+        "n5_aumento80": 2,
+        "n5_risco": 1,
+        "classe": "FALHA",
+        "ordem_regra": "1_perda_pct>=10",
+        "split": "treino",
+        "rota": "DE->PT",
+        "escopo": "regional"
+      },
+      "pico_isolado_ok": {
+        "timestamp": 1789282320,
+        "datetime_utc": "2026-09-13T06:52:00Z",
+        "fluxo_id": "101|193.136.0.1",
+        "prb_id": "101",
+        "dst_addr": "193.136.0.1",
+        "sent": 3,
+        "rcvd": 3,
+        "avg_rtt_ms": "54.06",
+        "jitter_ms": "1.65",
+        "mediana_baseline_ms": "48.2100",
+        "mad_baseline_ms": "1.3500",
+        "jitter_tipico_ms": "1.0000",
+        "z_robusto": "2.9228",
+        "aumento_pct": "12.1344",
+        "jitter_relativo": "1.6500",
+        "perda_pct": "0.00",
+        "timeout_atual": 0,
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 1,
+        "classe": "OK",
+        "ordem_regra": "6_ok",
+        "split": "treino",
+        "rota": "DE->PT",
+        "escopo": "regional"
+      }
+    }
+  },
+  "splits": {
+    "treino": {
+      "total": 80386,
+      "proporcao_pct": 49.99,
+      "inicio_utc": "2026-09-13T04:32:00Z",
+      "fim_utc": "2026-09-16T16:40:00Z",
+      "classes": {
+        "FALHA": 33129,
+        "OK": 47005,
+        "RISCO": 252
+      },
+      "classes_pct": {
+        "FALHA": 41.21,
+        "OK": 58.47,
+        "RISCO": 0.31
+      }
+    },
+    "validacao": {
+      "total": 32148,
+      "proporcao_pct": 19.99,
+      "inicio_utc": "2026-09-16T16:20:00Z",
+      "fim_utc": "2026-09-18T02:12:00Z",
+      "classes": {
+        "OK": 18975,
+        "FALHA": 13042,
+        "RISCO": 131
+      },
+      "classes_pct": {
+        "OK": 59.02,
+        "FALHA": 40.57,
+        "RISCO": 0.41
+      }
+    },
+    "teste": {
+      "total": 48270,
+      "proporcao_pct": 30.02,
+      "inicio_utc": "2026-09-18T01:56:00Z",
+      "fim_utc": "2026-09-20T04:28:00Z",
+      "classes": {
+        "FALHA": 19778,
+        "RISCO": 189,
+        "OK": 28303
+      },
+      "classes_pct": {
+        "FALHA": 40.97,
+        "RISCO": 0.39,
+        "OK": 58.63
+      }
+    }
+  }
+}
