@@ -1,0 +1,314 @@
+{
+  "dataset": {
+    "nome": "RIPE Atlas Anchoring Mesh (IPv4) — Período B Normalizado pelo Período A",
+    "n_treino": 80386,
+    "n_validacao": 32148,
+    "n_teste": 48270,
+    "semente_fixa": 42,
+    "colunas_modelo": [
+      "z_robusto",
+      "aumento_pct",
+      "jitter_relativo",
+      "perda_pct",
+      "timeout_atual",
+      "n5_timeout",
+      "n5_aumento80",
+      "n5_risco"
+    ],
+    "distribuicao_teste": {
+      "OK": 28303,
+      "RISCO": 189,
+      "FALHA": 19778
+    }
+  },
+  "tuning_validacao": {
+    "arvore_decisao": [
+      {
+        "config": "criterion='gini', max_depth=3, min_samples_leaf=50",
+        "f1_macro_val": 0.6546,
+        "recall_falha_val": 0.9617,
+        "recall_risco_val": 0.0,
+        "folhas": 5
+      },
+      {
+        "config": "criterion='gini', max_depth=4, min_samples_leaf=50",
+        "f1_macro_val": 0.6655,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 0.0,
+        "folhas": 6
+      },
+      {
+        "config": "criterion='gini', max_depth=6, min_samples_leaf=50",
+        "f1_macro_val": 0.9999,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 1.0,
+        "folhas": 8
+      },
+      {
+        "config": "criterion='entropy', max_depth=6, min_samples_leaf=20 (Escolhida)",
+        "f1_macro_val": 1.0,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 1.0,
+        "folhas": 7
+      }
+    ],
+    "random_forest": [
+      {
+        "config": "n_estimators=9, max_depth=4, max_features=3, min_samples_leaf=20",
+        "oob_accuracy": 0.9686,
+        "f1_macro_val": 0.6547,
+        "recall_falha_val": 0.9617,
+        "recall_risco_val": 0.0,
+        "erros_val": 633
+      },
+      {
+        "config": "n_estimators=15, max_depth=6, max_features=3, min_samples_leaf=20",
+        "oob_accuracy": 0.9956,
+        "f1_macro_val": 0.7461,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 0.1374,
+        "erros_val": 118
+      },
+      {
+        "config": "n_estimators=15, max_depth=6, max_features=5, min_samples_leaf=20",
+        "oob_accuracy": 0.9968,
+        "f1_macro_val": 0.7462,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 0.1374,
+        "erros_val": 116
+      }
+    ],
+    "xgboost": [
+      {
+        "config": "n_estimators=8, max_depth=3, learning_rate=0.3, reg_lambda=1.0, gamma=0.1",
+        "best_round": 8,
+        "logloss_final_val": 0.012747,
+        "f1_macro_val": 0.9912,
+        "recall_falha_val": 0.9995,
+        "recall_risco_val": 1.0,
+        "erros_val": 7
+      },
+      {
+        "config": "n_estimators=12, max_depth=6, learning_rate=0.35, reg_lambda=1.0, gamma=0.1",
+        "best_round": 12,
+        "logloss_final_val": 0.000211,
+        "f1_macro_val": 1.0,
+        "recall_falha_val": 1.0,
+        "recall_risco_val": 1.0,
+        "erros_val": 0
+      }
+    ]
+  },
+  "comparacao_teste_principal": {
+    "arvore_decisao": {
+      "nome": "Árvore de Decisão (CART)",
+      "hiperparametros": "criterion='entropy', max_depth=6, min_samples_leaf=20, random_state=42",
+      "estrutura": "1 árvore (7 folhas, 13 nós totais)",
+      "tempo_treino_ms": 844.61,
+      "tempo_pred_teste_ms": 8.52,
+      "tempo_pred_us_por_amostra": 0.1765,
+      "metricas_teste": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 28303,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 189,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 19778
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 28303
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 189
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 19778
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 48270,
+        "total_erros": 0
+      },
+      "importancia_atributos": {
+        "z_robusto": 0.4138,
+        "aumento_pct": 0.0,
+        "jitter_relativo": 0.0,
+        "perda_pct": 0.36,
+        "timeout_atual": 0.0,
+        "n5_timeout": 0.1115,
+        "n5_aumento80": 0.1043,
+        "n5_risco": 0.0103
+      }
+    },
+    "random_forest": {
+      "nome": "Random Forest (Bagging)",
+      "hiperparametros": "n_estimators=15, max_depth=6, max_features=5, min_samples_leaf=20, bootstrap=True, random_state=42",
+      "estrutura": "15 árvores independentes em paralelo (votação majoritária)",
+      "oob_accuracy_treino": 0.9968,
+      "tempo_treino_ms": 18779.15,
+      "tempo_pred_teste_ms": 231.55,
+      "tempo_pred_us_por_amostra": 4.797,
+      "metricas_teste": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 28302,
+            "RISCO": 0,
+            "FALHA": 1
+          },
+          "RISCO": {
+            "OK": 160,
+            "RISCO": 29,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 19778
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 0.9944,
+            "recall": 1.0,
+            "f1": 0.9972,
+            "suporte": 28303
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 0.1534,
+            "f1": 0.2661,
+            "suporte": 189
+          },
+          "FALHA": {
+            "precisao": 0.9999,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 19778
+          }
+        },
+        "f1_macro": 0.7544,
+        "balanced_accuracy": 0.7178,
+        "acuracia": 0.9967,
+        "total_amostras": 48270,
+        "total_erros": 161
+      },
+      "importancia_atributos": {
+        "z_robusto": 0.2963,
+        "aumento_pct": 0.028,
+        "jitter_relativo": 0.1843,
+        "perda_pct": 0.2919,
+        "timeout_atual": 0.0122,
+        "n5_timeout": 0.0888,
+        "n5_aumento80": 0.0942,
+        "n5_risco": 0.0043
+      }
+    },
+    "xgboost": {
+      "nome": "XGBoost (Gradient Boosted Trees)",
+      "hiperparametros": "n_estimators=12 (36 árvores multiclasse), max_depth=6, learning_rate=0.35, reg_lambda=1.0, gamma=0.1, random_state=42",
+      "estrutura": "12 rodadas sequenciais x 3 classes = 36 árvores aditivas",
+      "logloss_validacao_por_rodada": [
+        0.346738,
+        0.155104,
+        0.073724,
+        0.035903,
+        0.017804,
+        0.008856,
+        0.004499,
+        0.002266,
+        0.00117,
+        0.00063,
+        0.000349,
+        0.000211
+      ],
+      "tempo_treino_ms": 52649.35,
+      "tempo_pred_teste_ms": 361.83,
+      "tempo_pred_us_por_amostra": 7.496,
+      "metricas_teste": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 28303,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 189,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 19778
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 28303
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 189
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 19778
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 48270,
+        "total_erros": 0
+      },
+      "importancia_atributos": {
+        "z_robusto": 0.4515,
+        "aumento_pct": 0.0,
+        "jitter_relativo": 0.0024,
+        "perda_pct": 0.3804,
+        "timeout_atual": 0.0,
+        "n5_timeout": 0.0691,
+        "n5_aumento80": 0.0892,
+        "n5_risco": 0.0074
+      }
+    }
+  },
+  "experimento_ablacao_sem_n5_risco": {
+    "descricao": "Experimento de ablação removendo a variável agregada n5_risco para observar o comportamento quando a persistência da classe rara (RISCO, 0.39%) não está explícita na feature.",
+    "arvore_f1_macro": 0.6656,
+    "rf_f1_macro": 0.6656,
+    "xgb_f1_macro": 0.6841,
+    "arvore_erros_teste": 189,
+    "rf_erros_teste": 190,
+    "xgb_erros_teste": 203
+  }
+}

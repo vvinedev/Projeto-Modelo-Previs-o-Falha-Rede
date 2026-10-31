@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Avatar ilustrado de Vinicius Firmino Souto">
+  <circle cx="60" cy="60" r="58" fill="#047857"/>
+  <circle cx="60" cy="44" r="20" fill="rgba(255,255,255,0.22)"/>
+  <path d="M24 102 C30 78, 90 78, 96 102" fill="rgba(255,255,255,0.22)"/>
+  <text x="60" y="68" font-family="sans-serif" font-size="34" font-weight="bold" fill="#ffffff" text-anchor="middle">VS</text>
+</svg>

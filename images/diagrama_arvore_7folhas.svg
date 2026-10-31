@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 420" role="img" aria-labelledby="t-arv d-arv">
+  <title id="t-arv">Árvore de Decisão Final (7 folhas, Entropia, Profundidade 6)</title>
+  <desc id="d-arv">Diagrama da Árvore de Decisão CART ajustada no projeto, mostrando os cortes em z_robusto, perda_pct, n5_aumento80, n5_timeout e n5_risco até chegar às 7 folhas 100% puras.</desc>
+  <rect width="880" height="420" rx="12" fill="#f8fafc"/>
+  <g stroke="#64748b" stroke-width="2" fill="none">
+    <path d="M440 52 L260 105 M440 52 L680 105"/>
+    <path d="M260 141 L170 195 M260 141 L430 195"/>
+    <path d="M170 231 L120 285 M170 231 L310 285"/>
+    <path d="M120 321 L80 365 M120 321 L230 365"/>
+    <path d="M230 385 L185 405 M230 385 L295 405"/>
+  </g>
+  <!-- Raiz Nível 0 -->
+  <rect x="330" y="16" width="220" height="36" rx="6" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="440" y="39" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1e3a8a" text-anchor="middle">N0: z_robusto &lt;= 3,5010 (n=80.386)</text>
+  <!-- Folha 7 Direita -->
+  <rect x="570" y="105" width="240" height="38" rx="18" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="690" y="129" font-family="sans-serif" font-size="12" font-weight="bold" fill="#991b1b" text-anchor="middle">Folha 7: FALHA (n=19.569, z &gt; 3,50)</text>
+  <!-- Nível 1 -->
+  <rect x="155" y="105" width="210" height="36" rx="6" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="260" y="128" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a" text-anchor="middle">N1: perda_pct &lt;= 16,67%</text>
+  <!-- Folha 6 -->
+  <rect x="340" y="195" width="230" height="36" rx="18" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="455" y="218" font-family="sans-serif" font-size="12" font-weight="bold" fill="#991b1b" text-anchor="middle">Folha 6: FALHA (n=10.297, perda)</text>
+  <!-- Nível 2 -->
+  <rect x="70" y="195" width="200" height="36" rx="6" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="170" y="218" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a" text-anchor="middle">N2: n5_aumento80 &lt;= 1,5</text>
+  <!-- Folha 5 -->
+  <rect x="235" y="285" width="235" height="36" rx="18" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="352" y="308" font-family="sans-serif" font-size="12" font-weight="bold" fill="#991b1b" text-anchor="middle">Folha 5: FALHA (n=1.891, aum80&gt;=2)</text>
+  <!-- Nível 3 -->
+  <rect x="25" y="285" width="190" height="36" rx="6" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="120" y="308" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a" text-anchor="middle">N3: n5_timeout &lt;= 2,5</text>
+  <!-- Folha 4 -->
+  <rect x="495" y="285" width="250" height="36" rx="18" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <path d="M215 303 L495 303" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3"/>
+  <text x="620" y="308" font-family="sans-serif" font-size="12" font-weight="bold" fill="#991b1b" text-anchor="middle">Folha 4: FALHA (n=1.372, timeout&gt;=3)</text>
+  <!-- Folha 1 e Nível 4/5 -->
+  <rect x="10" y="365" width="155" height="36" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="87" y="388" font-family="sans-serif" font-size="11" font-weight="bold" fill="#166534" text-anchor="middle">Folha 1: OK (n=46.212, z&lt;=2)</text>
+  <rect x="175" y="352" width="185" height="32" rx="6" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="267" y="372" font-family="sans-serif" font-size="11" font-weight="bold" fill="#1e3a8a" text-anchor="middle">N4/N5: z&gt;2 e n5_risco &lt;= 1,5?</text>
+  <rect x="165" y="390" width="145" height="26" rx="13" fill="#dcfce7" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="237" y="407" font-family="sans-serif" font-size="11" font-weight="bold" fill="#166534" text-anchor="middle">Folha 2: OK pico (n=793)</text>
+  <rect x="325" y="390" width="165" height="26" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="407" y="407" font-family="sans-serif" font-size="11" font-weight="bold" fill="#92400e" text-anchor="middle">Folha 3: RISCO (n=252)</text>
+</svg>
