@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Árvore de Decisão, Random Forest ou XGBoost? Escolhendo o Modelo Ideal para um Detector de Degradação de Rede</title>
+  <meta name="description" content="Artigo técnico interdisciplinar (Estrutura de Dados II): explicação didática e comparação experimental entre Árvore de Decisão (CART), Random Forest e XGBoost em 160.804 medições ICMP normalizadas do RIPE Atlas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/artigo.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-inner">
+    <a class="marca" href="#topo">GRUPO 42 · ED II</a>
+    <nav aria-label="Seções do artigo">
+      <a href="#introducao">Problema</a>
+      <a href="#arvore">Árvore</a>
+      <a href="#random-forest">Random Forest</a>
+      <a href="#xgboost">XGBoost</a>
+      <a href="#comparacao">Comparação</a>
+      <a href="#codigo">Código</a>
+      <a href="#resultados">Resultados</a>
+      <a href="#recomendacao">Recomendação</a>
+      <a href="#observacao">Observação</a>
+      <a href="#referencias">Referências</a>
+      <a href="#autoria">Autores</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo" class="miolo">
+
+  <div class="abertura">
+    <span class="selo-topo">Artigo Técnico · Estrutura de Dados II · 2026</span>
+    <h1>Árvore, Floresta ou Boosting? Escolhendo o Modelo para Detectar Degradação de Rede sem Confundir Geografia com Falha</h1>
+    <p class="lead">
+      Explicamos passo a passo como funcionam <strong>Árvore de Decisão (CART)</strong>, <strong>Random Forest (Bagging)</strong> e <strong>XGBoost (Gradient Boosting)</strong>, e colocamos os três à prova em <strong>160.804 medições ICMP reais</strong> do RIPE Atlas normalizadas pelo baseline de cada fluxo. Descubra por que uma acurácia de 99,67% escondeu o colapso de uma classe inteira e qual modelo recomendamos para operar em tempo real.
+    </p>
+
+    <div class="meta-publicacao">
+      <span>Publicado em: 30/10/2026</span>
+      <span>Última revisão: 31/10/2026</span>
+      <span>Semente experimental: <code>random_state = 42</code></span>
+      <span>Repositório: <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">GitHub · Grupo 42</a></span>
+    </div>
+
+    <div class="autores-abertura" aria-label="Autores do artigo">
+      <a class="autor-chip" href="#autoria">
+        <img src="./images/avatar_wendell.svg" alt="Avatar minimalista de Wendell Rodrigues Macedo">
+        <span>Wendell R. Macedo</span>
+      </a>
+      <a class="autor-chip" href="#autoria">
+        <img src="./images/avatar_vinicius.svg" alt="Avatar minimalista de Vinicius Firmino Souto">
+        <span>Vinicius F. Souto</span>
+      </a>
+      <a class="autor-chip" href="#autoria">
+        <img src="./images/avatar_fernando.svg" alt="Avatar minimalista de Fernando Paiva Coelho">
+        <span>Fernando P. Coelho</span>
+      </a>
+      <a class="autor-chip" href="#autoria">
+        <img src="./images/avatar_joao.svg" alt="Avatar minimalista de João Gustavo Sanches">
+        <span>João G. Sanches</span>
+      </a>
+      <a class="autor-chip" href="#autoria">
+        <img src="./images/avatar_daniel.svg" alt="Avatar minimalista de Daniel Dias Paranhos">
+        <span>Daniel D. Paranhos</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 1. INTRODUÇÃO -->
+  <section id="introducao">
+    <h2>1. Introdução: o problema real de redes que queremos resolver</h2>
+    <p>
+      Imagine que você trabalha no Centro de Operações de Rede (NOC) de um provedor ou universidade e precisa monitorar dezenas de enlaces usando medições de <code>ping</code> (ICMP) a cada 4 minutos. Uma regra fixa ingênua — como <em>"se o RTT passar de 100 ms, dispare alerta de FALHA"</em> — comete dois erros graves na prática:
+    </p>
+    <ul>
+      <li><strong>Alarme falso permanente em rotas longas saudáveis:</strong> um cabo submarino entre São Paulo e Tóquio (<code>BR → JP</code>) ou São Paulo e Índia (<code>BR → IN</code>) leva fisicamente entre <code>277 ms</code> e <code>344 ms</code> para ir e voltar na fibra óptica. Com limiar fixo de <code>100 ms</code>, esse enlace saudável aparece em <strong>FALHA 100% do tempo</strong>.</li>
+      <li><strong>Cegueira em rotas curtas degradadas:</strong> um enlace intra-europeu curto (<code>DE → DE</code>) tem latência normal de <code>14,1 ms</code>. Se um congestionamento severo elevar esse RTT para <code>31,6 ms</code> (+124% acima do normal), uma regra fixa de <code>100 ms</code> dirá que está tudo <strong>OK</strong>, ignorando a saturação do enlace.</li>
+    </ul>
+    <p>
+      Para resolver esse problema sem ensinar o modelo a decorar países ou endereços IP, congelamos os primeiros 7 dias de coleta (<strong>Período A</strong>, mínimo de 1.500 respostas válidas por fluxo) como a <strong>ficha de baseline</strong> de cada par origem-destino (<code>mediana</code> e desvio absoluto mediano <code>MAD</code>). Nos 7 dias seguintes (<strong>Período B</strong>, <code>160.804</code> medições em 64 fluxos elegíveis), descrevemos cada medição apenas pelo seu <strong>afastamento relativo ao próprio baseline</strong>, classificando o estado operacional em <strong>OK</strong> (58,63%), <strong>RISCO</strong> (0,39%) ou <strong>FALHA</strong> (40,97%).
+    </p>
+    <p>
+      Neste artigo, você vai aprender como funcionam três algoritmos clássicos baseados em árvores — <strong>Árvore de Decisão (CART)</strong>, <strong>Random Forest</strong> e <strong>XGBoost</strong> —, verá o código em Python para treiná-los sem vazamento de dados e descobrirá qual deles escolhemos para o nosso detector de degradação de redes.
+    </p>
+
+    <div class="caixa">
+      <h3>Exemplo concreto antes da abstração: duas medições reais do nosso conjunto de teste</h3>
+      <p>
+        Antes de falar de impureza de Gini, entropia, <em>bagging</em> ou <em>boosting</em>, observe duas linhas reais de <code>data/processed/teste_periodo_b.csv</code> que qualquer modelo precisa classificar sem conhecer o IP nem o país:
+      </p>
+      <ul>
+        <li>
+          <strong>Caso A (Caminho intercontinental longo estável → classe <code>OK</code>):</strong> fluxo <code>301|14.139.0.1</code> (<code>BR → IN</code>) em <code>2026-09-18T02:32:00Z</code>. O RTT medido é alto (<code>342,77 ms</code>), mas a mediana histórica desse fluxo no Período A é <code>339,25 ms</code> (<code>MAD = 2,54 ms</code>). Logo, o desvio padronizado robusto é <code>z_robusto = 0,9347</code>, com <code>perda_pct = 0%</code> e <code>n5_timeout = 0</code>. O enlace está operando exatamente dentro do seu normal físico.
+        </li>
+        <li>
+          <strong>Caso B (Caminho curto em degradação severa → classe <code>FALHA</code>):</strong> fluxo <code>101|194.109.133.10</code> (<code>DE → DE</code>) em <code>2026-09-13T06:12:00Z</code>. O RTT medido é de apenas <code>31,62 ms</code>, mas a mediana histórica desse fluxo curto é <code>14,10 ms</code> (<code>MAD = 0,58 ms</code>). Isso representa um salto de <code>z_robusto = 20,37</code> (+124,26% acima da mediana), indicando anomalia imediata.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. ÁRVORE DE DECISÃO -->
+  <section id="arvore">
+    <h2>2. Modelo 1 — Árvore de Decisão (CART): regras explícitas em cascata</h2>
+    <p>
+      Uma <strong>Árvore de Decisão</strong> é uma estrutura de dados hierárquica que classifica uma amostra fazendo uma sequência de perguntas binárias (<em>"o atributo X é menor ou igual ao limiar T?"</em>) a partir de um <strong>nó raiz</strong>, percorrendo <strong>nós internos</strong> até desembocar em uma <strong>folha</strong>, que entrega a classe prevista (<code>OK</code>, <code>RISCO</code> ou <code>FALHA</code>).
+    </p>
+    <p>
+      Durante o treinamento (algoritmo <em>CART — Classification and Regression Trees</em>), vamos testar em cada nó todas as variáveis disponíveis e todos os pontos de corte possíveis entre valores adjacentes. Escolhemos a pergunta que produz os dois grupos filhos mais "puros" — isto é, com a menor mistura de classes — segundo um <strong>critério de impureza</strong> (Índice de Gini ou Entropia de Informação).
+    </p>
+    <p>
+      Se deixarmos a árvore crescer sem limites até cada folha conter uma única medição, ela vai decorar ruídos pontuais do treino: esse fenômeno é o <strong>overfitting (sobreajuste)</strong>, caracterizado por <strong>alta variância</strong> (uma pequena mudança nos dados de treino altera drasticamente a árvore). Para evitar isso, controlamos dois <strong>hiperparâmetros</strong> (parâmetros definidos antes do treino): a <strong>profundidade máxima</strong> (<code>max_depth</code>) e o <strong>mínimo de amostras por folha</strong> (<code>min_samples_leaf</code>), realizando a <strong>poda (pruning)</strong> estrutural.
+    </p>
+
+    <figure class="figura-artigo">
+      <img src="./images/diagrama_arvore_7folhas.svg" alt="Diagrama da Árvore de Decisão CART final com 7 folhas, profundidade 6 e critério de entropia, destacando os cortes em z_robusto, perda_pct, n5_aumento80, n5_timeout e n5_risco.">
+      <figcaption>
+        <strong>Figura 1 — Nossa Árvore de Decisão final ajustada no projeto (7 folhas, 13 nós, <code>criterion='entropy'</code>, <code>max_depth=6</code>).</strong> Cada folha (elipses verdes, amarela e vermelhas) corresponde a uma regra operacional legível e 100% pura no treino (<code>n = 80.386</code>). Licença: CC BY 4.0 (elaborada pelo Grupo 42).
+      </figcaption>
+    </figure>
+
+    <div class="caixa-matematica">
+      <h4>Caixa de Aprofundamento Matemático — Impureza de Gini vs. Entropia de Shannon</h4>
+      <p>
+        Seja $S$ o conjunto de amostras em um nó e $p_c$ a proporção de amostras da classe $c \in \{\text{OK}, \text{RISCO}, \text{FALHA}\}$ naquele nó. O algoritmo CART escolhe o corte $(j, t)$ que maximiza a redução de impureza $\Delta I(S) = I(S) - \frac{|S_L|}{|S|}I(S_L) - \frac{|S_R|}{|S|}I(S_R)$:
+      </p>
+      <ul>
+        <li><strong>Índice de Gini:</strong> $\mathrm{Gini}(S) = 1 - \sum_{c=1}^{K} p_c^2$ (mede a probabilidade de erro ao sortear dois elementos ao acaso no nó).</li>
+        <li><strong>Entropia de Informação:</strong> $H(S) = -\sum_{c=1}^{K} p_c \log_2(p_c)$ (penaliza logaritmicamente pequenas contaminações de classes minoritárias).</li>
+      </ul>
+      <p>
+        <strong>Por que isso importou na nossa Tarefa 4?</strong> Na raiz da árvore, o critério de Gini deslocava o corte de <code>z_robusto</code> para <code>3,4073</code> e deixava 5 picos isolados <code>OK</code> presos numa folha de <code>FALHA</code>. Ao trocarmos para <strong>Entropia</strong>, a penalidade logarítmica cravou o corte da raiz em <code>z_robusto &lt;= 3,5010</code>, gerando uma folha direita 100% pura com <code>19.569</code> falhas e reduzindo a árvore de 9 para 7 folhas.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3. RANDOM FOREST -->
+  <section id="random-forest">
+    <h2>3. Modelo 2 — Random Forest (Bagging): estabilidade pelo voto da maioria</h2>
+    <p>
+      Se uma única árvore profunda sofre de alta <strong>variância</strong> (sensibilidade a pequenas flutuações da amostra de treino), a ideia da <strong>Random Forest</strong> (proposta por Leo Breiman em 2001) é combinar dezenas ou centenas de árvores independentes treinadas em paralelo e decidir pelo <strong>voto da maioria</strong>.
+    </p>
+    <p>
+      Mas atenção: se treinarmos 100 árvores determinísticas exatamente nos mesmos dados e com as mesmas colunas, obteremos 100 árvores idênticas! Para que o conjunto (<em>ensemble</em>) funcione, a Random Forest injeta aleatoriedade em dois lugares:
+    </p>
+    <ol>
+      <li><strong>Amostra Bootstrap (Bagging — <em>Bootstrap Aggregating</em>):</strong> cada árvore é treinada em uma amostra sorteada <em>com reposição</em> do mesmo tamanho do treino original. Em média, cerca de 63,2% das linhas entram no sorteio de uma árvore e <strong>36,8% ficam de fora</strong> — formando o conjunto <strong>Out-of-Bag (OOB)</strong>, que permite medir o erro de generalização (<strong>erro OOB</strong>) sem precisar de um conjunto externo.</li>
+      <li><strong>Seleção Aleatória de Atributos (<em>Random Subspace</em> / <code>max_features</code>):</strong> em cada divisão de nó, a árvore não pode olhar todas as $d = 8$ colunas; ela sorteia apenas um subconjunto aleatório de $m$ colunas (tipicamente $m = \lfloor\sqrt{d}\rfloor$ ou um valor ajustado na validação) e escolhe o melhor corte somente entre elas. Isso descorrelaciona as árvores da floresta.</li>
+    </ol>
+    <p>
+      Além da previsão, a Random Forest fornece a <strong>importância de atributos (MDI — <em>Mean Decrease in Impurity</em>)</strong>, somando quanto cada variável reduziu a impureza ao longo de todas as árvores da floresta.
+    </p>
+
+    <div class="caixa-matematica">
+      <h4>Caixa de Aprofundamento Matemático — Por que o Bagging reduz a variância (e quando o sorteio de colunas atrapalha)?</h4>
+      <p>
+        Se $B$ árvores têm variância individual $\sigma^2$ e correlação média par-a-par $\rho$, a variância da média da floresta é dada por:
+        $$\operatorname{Var}(\bar{f}) = \rho \sigma^2 + \frac{1 - \rho}{B}\sigma^2$$
+        Quando $B$ cresce, o segundo termo desaparece, e o sorteio aleatório de atributos (<code>max_features</code>) reduz $\rho$. Porém, há um efeito colateral crítico em redes muito desbalanceadas: quando uma classe é extremamente rara (como a nossa classe <code>RISCO</code>, com apenas <code>0,39%</code> das medições) e depende da conjunção exata de duas variáveis nos níveis profundos (<code>z_robusto &gt; 2,0</code> <strong>e</strong> <code>n5_risco &gt;= 2</code>), as árvores que não sorteiam <code>n5_risco</code> naquele nó votam na classe majoritária <code>OK</code>, podendo diluir a classe rara na votação!
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. XGBOOST -->
+  <section id="xgboost">
+    <h2>4. Modelo 3 — XGBoost (Gradient Boosting): correção sequencial de resíduos</h2>
+    <p>
+      Enquanto a Random Forest constrói árvores independentes em paralelo para reduzir a variância, o <strong>Boosting</strong> adota a filosofia oposta: constrói árvores <strong>em sequência</strong>, onde cada nova árvore é treinada especificamente para corrigir os erros (resíduos) deixados pela soma das árvores anteriores, reduzindo o <strong>viés (bias)</strong> do modelo.
+    </p>
+    <p>
+      O <strong>XGBoost (<em>eXtreme Gradient Boosting</em>)</strong>, criado por Tianqi Chen e Carlos Guestrin (2016), elevou o <em>Gradient Boosting</em> ao estado da arte em dados tabulares combinando aproximação de 2ª ordem da função de perda com regularização explícita na estrutura das árvores:
+    </p>
+    <ul>
+      <li><strong>Taxa de aprendizado (<code>learning_rate</code> ou $\eta$):</strong> em vez de somar 100% do peso da nova árvore, multiplicamos sua contribuição por um fator $\eta \in (0, 1]$ (por exemplo, <code>0,35</code>), deixando espaço para as próximas rodadas refinarem a fronteira de decisão.</li>
+      <li><strong>Regularização ($\lambda$ e $\gamma$):</strong> penaliza pesos exagerados nas folhas ($L_2$, controlado por $\lambda$) e exige um ganho mínimo ($\gamma$) para aceitar dividir um nó, atuando como uma poda matemática embutida.</li>
+      <li><strong>Parada antecipada (<em>Early Stopping</em>):</strong> monitoramos a função de perda (<em>multiclass log-loss</em>) no conjunto de validação a cada rodada e interrompemos o treino se ela parar de cair, prevenindo <em>overfitting</em>.</li>
+    </ul>
+
+    <figure class="figura-artigo">
+      <img src="./images/esquema_bagging_vs_boosting.svg" alt="Esquema comparativo entre Bagging (Random Forest com árvores em paralelo e votação por maioria) e Boosting (XGBoost com árvores em sequência corrigindo gradientes e hessianas).">
+      <figcaption>
+        <strong>Figura 2 — Bagging (Random Forest) vs. Boosting (XGBoost).</strong> Na floresta (esquerda), as árvores votam em paralelo; no XGBoost (direita), cada rodada $t$ ajusta uma árvore sobre os gradientes $g_i$ e hessianas $h_i$ dos erros da rodada $t-1$. Licença: CC BY 4.0 (Grupo 42).
+      </figcaption>
+    </figure>
+
+    <div class="caixa-matematica">
+      <h4>Caixa de Aprofundamento Matemático — Função Objetivo de 2ª Ordem do XGBoost (Chen &amp; Guestrin, 2016)</h4>
+      <p>
+        Na rodada $t$, o XGBoost minimiza a expansão de Taylor de segunda ordem da perda somada à penalidade de complexidade $\Omega(f_t) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2$:
+        $$\tilde{\mathcal{L}}^{(t)} = \sum_{i=1}^{n} \left[ g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2$$
+        onde $g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$ é o gradiente de 1ª ordem e $h_i = \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$ é a hessiana (curvatura de 2ª ordem). O peso ótimo da folha $j$ é $w_j^* = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$, e o ganho exato ao dividir um nó em esquerda ($L$) e direita ($R$) é:
+        $$\mathcal{G}_{\text{split}} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I_L} h_i + \lambda} + \frac{(\sum_{i \in I_R} g_i)^2}{\sum_{i \in I_R} h_i + \lambda} - \frac{(\sum_{i \in I} g_i)^2}{\sum_{i \in I} h_i + \lambda} \right] - \gamma$$
+      </p>
+    </div>
+  </section>
+
+  <!-- 5. QUADRO COMPARATIVO -->
+  <section id="comparacao">
+    <h2>5. Quadro comparativo: os três modelos lado a lado</h2>
+    <p>
+      A tabela abaixo sintetiza as propriedades teóricas e operacionais dos três algoritmos quando aplicados à telemetria de redes:
+    </p>
+
+    <div class="rolagem">
+      <table>
+        <caption>Comparação estrutural e operacional entre Árvore de Decisão, Random Forest e XGBoost</caption>
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th>Árvore de Decisão (CART)</th>
+            <th>Random Forest (Bagging)</th>
+            <th>XGBoost (Gradient Boosting)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Como funciona</strong></td>
+            <td>Uma única árvore particiona o espaço de atributos recursivamente por ganho de informação (Entropia) ou Gini.</td>
+            <td>Várias árvores independentes treinadas em paralelo com <em>bootstrap</em> e sorteio de colunas; decide por votação.</td>
+            <td>Árvores rasas construídas em sequência; cada árvore corrige gradientes ($g_i$) e hessianas ($h_i$) dos erros anteriores.</td>
+          </tr>
+          <tr>
+            <td><strong>O que ataca (Viés vs. Variância)</strong></td>
+            <td>Baixo viés se tiver profundidade suficiente, porém <strong>alta variância</strong> se não for podada.</td>
+            <td><strong>Reduz a variância</strong> ao tirar a média/voto de árvores descorrelacionadas.</td>
+            <td><strong>Reduz o viés</strong> (e controla a variância via regularização $\lambda, \gamma$ e <em>shrinkage</em> $\eta$).</td>
+          </tr>
+          <tr>
+            <td><strong>Vantagens</strong></td>
+            <td>Regras 100% legíveis por humanos, inferência ultrarrápida ($\sim 0,18\;\mu\text{s}$), zero caixa-preta.</td>
+            <td>Robusta a ruído moderado, paraleliza fácil e fornece erro <em>Out-of-Bag</em> nativo.</td>
+            <td>Altíssimo poder preditivo em fronteiras complexas e foco automático nos erros de classes minoritárias.</td>
+          </tr>
+          <tr>
+            <td><strong>Desvantagens</strong></td>
+            <td>Sensível a mudanças no dataset se a profundidade/folha mínima não forem bem calibradas.</td>
+            <td>Perde interpretabilidade direta; sorteio de colunas pode diluir regras de classes raras (<code>0,39%</code>).</td>
+            <td>Mais lento para treinar e inferir; exige ajuste cuidadoso de <code>learning_rate</code>, <code>max_depth</code> e $\lambda$.</td>
+          </tr>
+          <tr>
+            <td><strong>Interpretabilidade</strong></td>
+            <td><strong>Máxima (Caixa-Branca):</strong> exportável como 7 regras <code>SE ... ENTÃO</code> em português.</td>
+            <td><strong>Média/Baixa:</strong> inspeciona-se apenas importância global de atributos (MDI) ou SHAP.</td>
+            <td><strong>Baixa:</strong> soma de dezenas de árvores em log-odds; exige importância de Ganho ou SHAP para auditoria.</td>
+          </tr>
+          <tr>
+            <td><strong>Tempo de treino e predição</strong></td>
+            <td><strong>Mais rápido</strong> (`844 ms` treino / `0,18 µs` predição por pacote).</td>
+            <td><strong>Intermediário</strong> (`18,8 s` treino / `4,80 µs` predição — `27x` mais lento).</td>
+            <td><strong>Mais custoso</strong> (`52,6 s` treino / `7,50 µs` predição — `42x` mais lento).</td>
+          </tr>
+          <tr>
+            <td><strong>Risco de Overfitting</strong></td>
+            <td>Alto se <code>max_depth=None</code>; baixo quando podada com validação (<code>max_depth=6, min_samples_leaf=20</code>).</td>
+            <td>Baixo em relação ao número de árvores, mas pode subajustar classes ultra-raras.</td>
+            <td>Alto se <code>n_estimators</code> e <code>learning_rate</code> forem grandes sem <em>early stopping</em>.</td>
+          </tr>
+          <tr>
+            <td><strong>Cenário ideal em redes</strong></td>
+            <td><strong>Agentes de monitoramento em tempo real</strong> com features normalizadas por baseline e exigência de auditoria NOC.</td>
+            <td>Classificação de tráfego com dezenas de features ruidosas e classes equilibradas.</td>
+            <td>Detecção de intrusão (IDS) offline/em lote com interações não-lineares sutis e dezenas de atributos brutos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6. CÓDIGO COMENTADO -->
+  <section id="codigo">
+    <h2>6. Código em Python: treinamento reproduzível e sem vazamento</h2>
+    <p>
+      Abaixo mostramos o trecho essencial em Python (compatível com <code>Python 3.12+</code>, <code>scikit-learn==1.5.2</code> e <code>xgboost==2.1.2</code>, listados em <a href="./requirements.txt"><code>requirements.txt</code></a>) que treina os três modelos exclusivamente em <code>treino_periodo_b.csv</code> (<code>80.386</code> linhas), ajusta hiperparâmetros em <code>validacao_periodo_b.csv</code> (<code>32.148</code> linhas) e avalia uma única vez em <code>teste_periodo_b.csv</code> (<code>48.270</code> linhas). O script completo sem dependências externas está em <a href="./src/experimento_artigo.py"><code>src/experimento_artigo.py</code></a> e o notebook executado em <a href="./notebooks/7_Experimento_Artigo_Arvore_RF_XGBoost.ipynb"><code>notebooks/7_Experimento_Artigo_Arvore_RF_XGBoost.ipynb</code></a>.
+    </p>
+
+<pre><code># Python 3.12+ | scikit-learn==1.5.2 | xgboost==2.1.2 | pandas==2.2.3
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, f1_score
+from xgboost import XGBClassifier
+
+# 1. Exclusivamente as 8 features relativas ao baseline do Período A (zero país, IP ou RTT bruto)
+COLUNAS_MODELO = [
+    "z_robusto", "aumento_pct", "jitter_relativo", "perda_pct",
+    "timeout_atual", "n5_timeout", "n5_aumento80", "n5_risco"
+]
+MAPA_CLASSES = {"OK": 0, "RISCO": 1, "FALHA": 2}
+
+treino = pd.read_csv("data/processed/treino_periodo_b.csv")
+validacao = pd.read_csv("data/processed/validacao_periodo_b.csv")
+teste = pd.read_csv("data/processed/teste_periodo_b.csv")
+
+# Imputação de timeouts aprendida SOMENTE no treino (evita data leakage)
+medianas_treino = treino[COLUNAS_MODELO].median()
+X_tr = treino[COLUNAS_MODELO].fillna(medianas_treino)
+y_tr = treino["classe"].map(MAPA_CLASSES)
+X_va = validacao[COLUNAS_MODELO].fillna(medianas_treino)
+y_va = validacao["classe"].map(MAPA_CLASSES)
+X_te = teste[COLUNAS_MODELO].fillna(medianas_treino)
+y_te = teste["classe"].map(MAPA_CLASSES)
+
+# 2. Modelo 1: Árvore de Decisão (CART) ajustada pelo erro na validação
+arvore = DecisionTreeClassifier(
+    criterion="entropy", max_depth=6, min_samples_leaf=20, random_state=42
+)
+arvore.fit(X_tr, y_tr)
+
+# 3. Modelo 2: Random Forest (Bagging + Subespaço Aleatório de Atributos)
+floresta = RandomForestClassifier(
+    n_estimators=15, max_depth=6, max_features=5,
+    min_samples_leaf=20, bootstrap=True, oob_score=True, random_state=42
+)
+floresta.fit(X_tr, y_tr)
+
+# 4. Modelo 3: XGBoost (Gradient Boosting de 2ª Ordem com Early Stopping na Validação)
+xgb = XGBClassifier(
+    n_estimators=12, max_depth=6, learning_rate=0.35,
+    reg_lambda=1.0, gamma=0.1, objective="multi:softprob",
+    num_class=3, eval_metric="mlogloss", random_state=42
+)
+xgb.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
+
+# 5. Avaliação única no conjunto de Teste (N = 48.270)
+for nome, modelo in [("Árvore CART", arvore), ("Random Forest", floresta), ("XGBoost", xgb)]:
+    y_pred = modelo.predict(X_te)
+    print(f"=== {nome} | F1 Macro: {f1_score(y_te, y_pred, average='macro'):.4f} ===")
+    print(confusion_matrix(y_te, y_pred))</code></pre>
+  </section>
+
+  <!-- 7. RESULTADOS DO EXPERIMENTO -->
+  <section id="resultados">
+    <h2>7. Experimento e resultados no detector de redes</h2>
+    <p>
+      Nosso dataset público do <em>Anchoring Mesh</em> do RIPE Atlas contém <strong>336.326 medições ICMP</strong> (14 dias, 67 fluxos). Os primeiros 7 dias (<strong>Período A</strong>) geraram a ficha congelada de baseline para os <strong>64 fluxos elegíveis</strong> ($\ge 1.500$ RTTs válidos). Os 7 dias seguintes (<strong>Período B</strong>, <code>160.804</code> medições) foram divididos em ordem estritamente cronológica dentro de cada fluxo (sem sorteio aleatório):
+    </p>
+    <ul>
+      <li><strong>Treino (50% mais antigos):</strong> <code>80.386</code> medições (<code>47.005 OK</code>, <code>252 RISCO</code>, <code>33.129 FALHA</code>);</li>
+      <li><strong>Validação (20% intermediários — onde ajustamos hiperparâmetros):</strong> <code>32.148</code> medições (<code>18.975 OK</code>, <code>131 RISCO</code>, <code>13.042 FALHA</code>);</li>
+      <li><strong>Teste (30% mais recentes — aberto uma única vez):</strong> <code>48.270</code> medições (<code>28.303 OK</code>, <code>189 RISCO</code>, <code>19.778 FALHA</code>).</li>
+    </ul>
+
+    <h3>7.1 Ajuste honesto de hiperparâmetros na Validação (<code>32.148</code> linhas)</h3>
+    <p>
+      Para garantir uma comparação justa, cada modelo recebeu esforço equivalente de ajuste olhando <strong>exclusivamente para a validação</strong>:
+    </p>
+    <div class="rolagem">
+      <table>
+        <caption>Resumo do ajuste de hiperparâmetros no conjunto de Validação (antes de abrir o Teste)</caption>
+        <thead>
+          <tr>
+            <th>Família</th>
+            <th>Configuração Testada na Validação</th>
+            <th class="num">F1 Macro (Val)</th>
+            <th class="num">Recall FALHA</th>
+            <th class="num">Recall RISCO</th>
+            <th>Decisão na Validação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Árvore (CART)</strong></td>
+            <td><code>criterion='gini', max_depth=3, min_samples_leaf=50</code> (Tarefa 3)</td>
+            <td class="num">0,6546</td>
+            <td class="num">0,9617</td>
+            <td class="num">0,0000</td>
+            <td>Descartada (634 erros; RISCO some).</td>
+          </tr>
+          <tr>
+            <td><strong>Árvore (CART)</strong></td>
+            <td><code>criterion='entropy', max_depth=6, min_samples_leaf=20</code> (Tarefa 4)</td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td><strong>Escolhida (7 folhas puras, 0 erros).</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Random Forest</strong></td>
+            <td><code>n_estimators=9, max_depth=4, max_features=3, min_samples_leaf=20</code></td>
+            <td class="num">0,6547</td>
+            <td class="num">0,9617</td>
+            <td class="num">0,0000</td>
+            <td>Descartada (profundidade rasa).</td>
+          </tr>
+          <tr>
+            <td><strong>Random Forest</strong></td>
+            <td><code>n_estimators=15, max_depth=6, max_features=5, min_samples_leaf=20</code></td>
+            <td class="num"><strong>0,7462</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num">0,1374</td>
+            <td><strong>Escolhida para o Teste (OOB = 99,68%).</strong></td>
+          </tr>
+          <tr>
+            <td><strong>XGBoost</strong></td>
+            <td><code>n_estimators=8, max_depth=3, learning_rate=0.30, reg_lambda=1.0</code></td>
+            <td class="num">0,9912</td>
+            <td class="num">0,9995</td>
+            <td class="num">1,0000</td>
+            <td>Descartada (7 erros residuais).</td>
+          </tr>
+          <tr>
+            <td><strong>XGBoost</strong></td>
+            <td><code>n_estimators=12, max_depth=6, learning_rate=0.35, reg_lambda=1.0, gamma=0.1</code></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td><strong>Escolhida (Log-loss val = 0,000211).</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.2 Resultado final no conjunto de Teste (<code>48.270</code> medições)</h3>
+    <figure class="figura-artigo">
+      <img src="./images/grafico_metricas_tempos.svg" alt="Gráfico comparativo mostrando F1 Macro, Recall da classe RISCO e latência de inferência em microssegundos para Árvore de Decisão, Random Forest e XGBoost.">
+      <figcaption>
+        <strong>Figura 3 — Confronto no Teste (N = 48.270): Qualidade de detecção vs. Latência de inferência.</strong> A Árvore de Decisão (CART) e o XGBoost cravam <code>F1 Macro = 1,0000</code>, mas a Árvore simples é <strong>42,5x mais rápida</strong> por medição. Já a Random Forest sofre queda severa no <code>Recall de RISCO</code> (15,34%). Licença: CC BY 4.0 (Grupo 42).
+      </figcaption>
+    </figure>
+
+    <div class="rolagem">
+      <table>
+        <caption>Métricas por classe, F1 Macro e tempos de execução no conjunto de Teste (<code>48.270</code> medições)</caption>
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th class="num">Acurácia</th>
+            <th class="num">F1 Macro</th>
+            <th class="num">Prec / Rec / F1 (<code>OK</code>)</th>
+            <th class="num">Prec / Rec / F1 (<code>RISCO</code>)</th>
+            <th class="num">Prec / Rec / F1 (<code>FALHA</code>)</th>
+            <th class="num">Treino (ms)</th>
+            <th class="num">Predição (µs/med)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Árvore de Decisão (CART)</strong><br><small>1 árvore, 7 folhas</small></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num">1,00 / 1,00 / 1,00</td>
+            <td class="num"><strong>1,00 / 1,00 / 1,00</strong></td>
+            <td class="num">1,00 / 1,00 / 1,00</td>
+            <td class="num"><strong>844,61 ms</strong></td>
+            <td class="num"><strong>0,1765 µs</strong> (1,0x)</td>
+          </tr>
+          <tr>
+            <td><strong>2. Random Forest (Bagging)</strong><br><small>15 árvores paralelas</small></td>
+            <td class="num">0,9967</td>
+            <td class="num">0,7544</td>
+            <td class="num">0,99 / 1,00 / 1,00</td>
+            <td class="num">1,00 / <strong>0,1534</strong> / 0,2661</td>
+            <td class="num">1,00 / 1,00 / 1,00</td>
+            <td class="num">18.779,15 ms</td>
+            <td class="num">4,7970 µs (27,2x)</td>
+          </tr>
+          <tr>
+            <td><strong>3. XGBoost (Boosting)</strong><br><small>36 árvores aditivas</small></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num"><strong>1,0000</strong></td>
+            <td class="num">1,00 / 1,00 / 1,00</td>
+            <td class="num"><strong>1,00 / 1,00 / 1,00</strong></td>
+            <td class="num">1,00 / 1,00 / 1,00</td>
+            <td class="num">52.649,35 ms</td>
+            <td class="num">7,4960 µs (42,5x)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.3 Matrizes de Confusão 3×3 no Teste (Contagem exata em <code>48.270</code> linhas)</h3>
+    <div class="tres-matrizes">
+      <div class="rolagem">
+        <table>
+          <caption>1. Árvore de Decisão (0 erros)</caption>
+          <thead>
+            <tr><th>Real \ Pred</th><th class="num">OK</th><th class="num">RISCO</th><th class="num">FALHA</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>OK</strong></td><td class="num"><strong>28.303</strong></td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td><strong>RISCO</strong></td><td class="num">0</td><td class="num"><strong>189</strong></td><td class="num">0</td></tr>
+            <tr><td><strong>FALHA</strong></td><td class="num">0</td><td class="num">0</td><td class="num"><strong>19.778</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rolagem">
+        <table>
+          <caption>2. Random Forest (161 erros)</caption>
+          <thead>
+            <tr><th>Real \ Pred</th><th class="num">OK</th><th class="num">RISCO</th><th class="num">FALHA</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>OK</strong></td><td class="num"><strong>28.302</strong></td><td class="num">0</td><td class="num">1</td></tr>
+            <tr><td><strong>RISCO</strong></td><td class="num"><strong>160</strong></td><td class="num"><strong>29</strong></td><td class="num">0</td></tr>
+            <tr><td><strong>FALHA</strong></td><td class="num">0</td><td class="num">0</td><td class="num"><strong>19.778</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rolagem">
+        <table>
+          <caption>3. XGBoost (0 erros)</caption>
+          <thead>
+            <tr><th>Real \ Pred</th><th class="num">OK</th><th class="num">RISCO</th><th class="num">FALHA</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>OK</strong></td><td class="num"><strong>28.303</strong></td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td><strong>RISCO</strong></td><td class="num">0</td><td class="num"><strong>189</strong></td><td class="num">0</td></tr>
+            <tr><td><strong>FALHA</strong></td><td class="num">0</td><td class="num">0</td><td class="num"><strong>19.778</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>7.4 O que mais nos surpreendeu: por que a Random Forest teve 99,67% de acurácia e falhou em <code>RISCO</code>?</h3>
+    <p>
+      Esse resultado ilustra perfeitamente por que <strong>acurácia sozinha engana em redes</strong>: como <code>OK</code> (58,63%) e <code>FALHA</code> (40,97%) somam 99,61% das medições, a Random Forest atingiu <strong>99,67% de acurácia global</strong>, mas deixou escapar <strong>160 das 189 ocorrências de <code>RISCO</code></strong> (<code>Recall de RISCO = 15,34%</code>), jogando-as silenciosamente em <code>OK</code>.
+    </p>
+    <p>
+      A explicação está na própria mecânica do <em>Random Subspace</em> (<code>max_features=5</code>): para separar as 252 amostras de <code>RISCO</code> no treino, uma árvore precisa obrigatoriamente usar <code>z_robusto &lt;= 2,0003</code> no nível 4 e <code>n5_risco &lt;= 1,5000</code> no nível 5. Nas árvores da floresta em que <code>n5_risco</code> não foi sorteado entre as 5 colunas candidatas daquele nó, o nó continuou com maioria de amostras <code>OK</code> (793 picos isolados <code>OK</code> contra 252 <code>RISCO</code>) e votou <code>OK</code>. Na votação por maioria simples, esses votos <code>OK</code> abafaram as árvores que viram <code>n5_risco</code>. Já o <strong>XGBoost</strong> não sofreu desse problema porque, a cada rodada sequencial, os gradientes $g_i$ das 252 amostras de <code>RISCO</code> cresceram até forçar as árvores seguintes a isolá-las com 100% de recall!
+    </p>
+
+    <h3>7.5 Importância dos Atributos nos Três Modelos</h3>
+    <div class="rolagem">
+      <table>
+        <caption>Importância normalizada dos 8 atributos relativos em cada modelo</caption>
+        <thead>
+          <tr>
+            <th>Atributo Relativo</th>
+            <th class="num">Árvore de Decisão (Ganho de Entropia)</th>
+            <th class="num">Random Forest (MDI Impureza)</th>
+            <th class="num">XGBoost (Ganho de 2ª Ordem)</th>
+            <th>Leitura Física no Monitoramento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>z_robusto</code></td>
+            <td class="num"><strong>41,38%</strong></td>
+            <td class="num"><strong>29,63%</strong></td>
+            <td class="num"><strong>45,15%</strong></td>
+            <td>Principal divisor de águas: separa explosões severas (&gt; 3,5) na raiz e desvios moderados (&gt; 2,0) no nível 4.</td>
+          </tr>
+          <tr>
+            <td><code>perda_pct</code></td>
+            <td class="num"><strong>36,00%</strong></td>
+            <td class="num"><strong>29,19%</strong></td>
+            <td class="num"><strong>38,04%</strong></td>
+            <td>Segundo gatilho dominante: qualquer perda na rajada de 3 pacotes ($\ge 33,3\%$) indica <code>FALHA</code> imediata.</td>
+          </tr>
+          <tr>
+            <td><code>n5_timeout</code></td>
+            <td class="num">11,15%</td>
+            <td class="num">8,88%</td>
+            <td class="num">6,91%</td>
+            <td>Captura indisponibilidade intermitente ($\ge 3$ timeouts nas últimas 5 janelas) mesmo quando o ping atual responde.</td>
+          </tr>
+          <tr>
+            <td><code>n5_aumento80</code></td>
+            <td class="num">10,43%</td>
+            <td class="num">9,42%</td>
+            <td class="num">8,92%</td>
+            <td>Captura degradação percentual severa sustentada ($\ge 2$ janelas com RTT &gt; +80% da mediana).</td>
+          </tr>
+          <tr>
+            <td><code>n5_risco</code></td>
+            <td class="num">1,03%</td>
+            <td class="num">0,43%</td>
+            <td class="num">0,74%</td>
+            <td>Embora tenha peso global pequeno (atua só no nível 5 sobre ~1,3% dos dados), é <strong>indispensável</strong> para separar <code>RISCO</code> de pico isolado <code>OK</code>.</td>
+          </tr>
+          <tr>
+            <td><code>jitter_relativo</code>, <code>aumento_pct</code>, <code>timeout_atual</code></td>
+            <td class="num">0,00%</td>
+            <td class="num">22,45% (somados)</td>
+            <td class="num">0,24%</td>
+            <td>Na Árvore e no XGBoost são redundantemente cobertos pelas janelas causais; na Random Forest entram quando as variáveis principais não são sorteadas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8. RECOMENDAÇÃO E LIMITAÇÕES -->
+  <section id="recomendacao">
+    <h2>8. Recomendação para o preditor de redes e limitações</h2>
+
+    <div class="destaque-vencedor">
+      <h3>Nossa escolha oficial: Árvore de Decisão CART Ajustada (7 folhas, Entropia, <code>max_depth=6</code>)</h3>
+      <p>
+        Com base nos números do experimento, <strong>recomendamos e adotamos a Árvore de Decisão simples ajustada (CART)</strong> como o modelo oficial de produção do nosso detector de degradação de redes, mantendo o <strong>XGBoost</strong> como ferramenta de benchmark offline.
+      </p>
+    </div>
+
+    <p>
+      Sustentamos nossa escolha em quatro pilares objetivos:
+    </p>
+    <ol>
+      <li><strong>Empate técnico perfeito em eficácia com o XGBoost (<code>F1 Macro = 1,0000</code>):</strong> graças à engenharia de atributos relativos ao baseline do fluxo (<code>z_robusto</code>, <code>perda_pct</code>, <code>n5_timeout</code>, <code>n5_aumento80</code>, <code>n5_risco</code>), a Árvore de Decisão de 7 folhas zerou os erros nas <code>48.270</code> medições do teste temporal e nas <code>40.201</code> medições de 16 fluxos inéditos (Protocolo B), igualando o XGBoost e superando com folga a Random Forest (<code>F1 Macro = 0,7544</code>).</li>
+      <li><strong>Custo assimétrico dos erros em redes:</strong> em um NOC, um <strong>Falso Negativo de FALHA ou RISCO</strong> (enlace degradando sem alerta) atrasa a mitigação e derruba serviços críticos, enquanto um <strong>Falso Positivo</strong> gera fadiga de alertas. A Random Forest falhou justamente no Falso Negativo de <code>RISCO</code> (perdeu 160 de 189 casos), enquanto a Árvore CART e o XGBoost tiveram zero falsos negativos e zero falsos positivos.</li>
+      <li><strong>Vantagem de 42,5x em latência de inferência:</strong> a Árvore de Decisão classifica uma medição em <strong><code>0,1765 µs</code></strong> (<code>8,52 ms</code> para todo o lote de 48.270 medições), contra <code>4,7970 µs</code> da Random Forest (27,2x mais lenta) e <strong><code>7,4960 µs</code> do XGBoost (42,5x mais lento)</strong>. Ela pode rodar embarcada em roteadores, sondas Raspberry Pi ou agentes leves sem biblioteca pesada.</li>
+      <li><strong>Interpretabilidade e auditabilidade total (Caixa-Branca):</strong> quando um alerta de <code>FALHA</code> ou <code>RISCO</code> dispara às 3h da manhã, o engenheiro de redes não quer ler a soma de 36 árvores em log-odds do XGBoost; ele lê exatamente qual das <strong>7 regras em português</strong> foi acionada (por exemplo: <em>"Folha 4: n5_timeout &gt;= 3 nas últimas 5 janelas"</em>).</li>
+    </ol>
+
+    <h3>Honestidade científica e limitações operacionais</h3>
+    <ul>
+      <li><strong>Política operacional vs. falha de hardware:</strong> como os rótulos da Tarefa 2 nasceram de uma política determinística sobre as mesmas métricas relativas, o modelo aprendeu a reproduzir perfeitamente essa política operacional, e não um log externo de rompimento de fibra ou defeito de <em>transceiver</em>.</li>
+      <li><strong>Detector do estado atual vs. Preditor de 12 minutos:</strong> quando testamos prever o estado <strong>12 minutos à frente</strong> (3 ciclos de 240 s), a Árvore (<code>F1 Macro = 0,4816</code>, <code>Recall FALHA = 53,29%</code>) não superou de forma útil a regra ingênua de repetir o estado atual (<code>F1 Macro = 0,4610</code>, <code>Recall FALHA = 63,11%</code>), pois quedas de pacotes súbitas não dão aviso prévio 12 minutos antes. Por isso, declaramos nosso sistema honestamente como um <strong>detector de degradação do estado atual</strong>.</li>
+      <li><strong>Mudança de rota e necessidade do estado <code>RECALIBRAR</code>:</strong> uma ficha de baseline fixa de 7 dias envelhece se o tráfego mudar permanentemente para um caminho mais longo saudável (<em>failover</em>). Operacionalmente, desvios altos e estáveis sem perda por mais de 1 hora devem acionar a recalibração da ficha, e não chamado de falha.</li>
+    </ul>
+  </section>
+
+  <!-- 9. QUADRO DE OBSERVAÇÃO -->
+  <section id="observacao">
+    <h2>9. Quadro de observação do grupo</h2>
+    <p>
+      Antes de construir esta página, analisamos duas referências técnicas da lista oficial e registramos nossas decisões de projeto (versão detalhada em <a href="./metadados/quadro_observacao_artigo.md"><code>metadados/quadro_observacao_artigo.md</code></a>):
+    </p>
+    <div class="duas-colunas">
+      <div class="caixa">
+        <h3>Duas referências observadas</h3>
+        <ol>
+          <li><strong>ActiveState (<em>Comparing Decision Tree Algorithms: RF vs. XGBoost</em>):</strong> observamos como o autor parte da árvore simples, passa pelo <em>bagging</em> e chega ao <em>boosting</em> sem saltos bruscos, resolvendo em cada etapa a fraqueza do modelo anterior.</li>
+          <li><strong>Documentação Oficial do XGBoost + Chen &amp; Guestrin (2016):</strong> observamos a separação limpa entre a intuição visual de árvores aditivas e a formalização matemática de 2ª ordem ($g_i, h_i, \lambda, \gamma$).</li>
+        </ol>
+      </div>
+      <div class="caixa">
+        <h3>Três decisões adotadas e uma rejeitada</h3>
+        <ul>
+          <li><strong>Adotamos 1:</strong> apresentar dois exemplos reais do RIPE Atlas (<code>BR→IN</code> a 342 ms vs. <code>DE→DE</code> a 31 ms) antes de qualquer equação.</li>
+          <li><strong>Adotamos 2:</strong> separar a intuição no texto principal e isolar as fórmulas de Gini/Entropia, variância do Bagging e ganho do XGBoost em caixas dedicadas.</li>
+          <li><strong>Adotamos 3:</strong> medir a latência por amostra em microssegundos ($\mu\text{s}$) ao lado do <code>F1 Macro</code> e do <code>Recall de RISCO</code>.</li>
+          <li><strong>Decidimos NÃO fazer:</strong> nunca escolher o vencedor pela acurácia global (que mascararia o colapso de 84,6% da Random Forest na classe <code>RISCO</code>) e nunca colocar IP, país ou RTT bruto nas features.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. LINKS E REFERÊNCIAS -->
+  <section id="referencias">
+    <h2>10. Links recomendados e referências bibliográficas</h2>
+
+    <h3>Links úteis comentados para continuar estudando</h3>
+    <ul>
+      <li>
+        <a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html" target="_blank" rel="noopener noreferrer">Documentação Oficial do XGBoost: Introduction to Boosted Trees</a> — A melhor explicação passo a passo sobre árvores aditivas, função objetivo regularizada e cálculo do ganho de divisão.
+      </li>
+      <li>
+        <a href="https://scikit-learn.org/stable/modules/tree.html" target="_blank" rel="noopener noreferrer">Guia do Usuário do scikit-learn: Decision Trees (CART)</a> — Documentação oficial detalhando os critérios de Gini e Entropia, complexidade computacional e poda por custo-complexidade.
+      </li>
+      <li>
+        <a href="https://www.datacamp.com/pt/tutorial/ensemble-learning-python-guide" target="_blank" rel="noopener noreferrer">DataCamp: Aprendizado em Conjunto em Python (Random Forest e XGBoost)</a> — Tutorial didático em português contrastando o paralelismo do <em>bagging</em> com a redução sequencial de viés do <em>boosting</em>.
+      </li>
+      <li>
+        <a href="https://www.activestate.com/blog/comparing-decision-tree-algorithms-random-forest-vs-xgboost/" target="_blank" rel="noopener noreferrer">ActiveState Blog: Comparing Decision Tree Algorithms — Random Forest vs. XGBoost</a> — Excelente visão prática de engenharia sobre quando a simplicidade vence e como evoluir de uma árvore única até ensembles.
+      </li>
+      <li>
+        <a href="https://atlas.ripe.net/docs/" target="_blank" rel="noopener noreferrer">Documentação Oficial do RIPE Atlas e Anchoring Mesh</a> — Referência da plataforma global de medição ativa de onde extraímos nossa série temporal pública de 14 dias.
+      </li>
+    </ul>
+
+    <h3>Referências bibliográficas citadas</h3>
+    <ol>
+      <li><strong>CHEN, Tianqi; GUESTRIN, Carlos.</strong> <em>XGBoost: A Scalable Tree Boosting System.</em> In: Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD '16), p. 785–794, 2016. Disponível em: <a href="https://arxiv.org/abs/1603.02754" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/1603.02754</a>.</li>
+      <li><strong>BREIMAN, Leo.</strong> <em>Random Forests.</em> Machine Learning, v. 45, n. 1, p. 5–32, 2001. DOI: 10.1023/A:1010933404324.</li>
+      <li><strong>BREIMAN, Leo; FRIEDMAN, Jerome; STONE, Charles J.; OLSHEN, R. A.</strong> <em>Classification and Regression Trees (CART).</em> CRC Press, 1984.</li>
+      <li><strong>RIPE NCC.</strong> <em>RIPE Atlas REST API v2 &amp; Anchoring Mesh Measurements (msm_id 1001 / IPv4 Ping).</em> Amsterdã: RIPE Network Coordination Centre, 2026. Disponível em: <a href="https://atlas.ripe.net/docs/apis/" target="_blank" rel="noopener noreferrer">https://atlas.ripe.net/docs/apis/</a>.</li>
+      <li><strong>ESTUDOS COMPARATIVOS EM REDES (NSL-KDD, CIC-IDS-2017 e UNSW-NB15):</strong> Comparação empírica de Árvore de Decisão, Random Forest e XGBoost em detecção de anomalias de rede (<a href="https://arxiv.org/pdf/2512.03200" target="_blank" rel="noopener noreferrer">arXiv:2512.03200</a> e <a href="https://sol.sbc.org.br/index.php/sbseg_estendido/article/download/44503/44266/" target="_blank" rel="noopener noreferrer">Anais Estendidos do SBSeg / SBC</a>).</li>
+    </ol>
+  </section>
+
+  <!-- 11. AUTORIA E PRIVACIDADE -->
+  <section id="autoria">
+    <h2>11. Autoria e conformidade com a LGPD</h2>
+    <p>
+      Este artigo técnico e todos os experimentos reproduzíveis foram desenvolvidos pelos integrantes do <strong>Grupo 42</strong> da disciplina de <strong>Estrutura de Dados II</strong> (orientação da Profa. Dra. Andréa Ono Sakai). Em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018), publicamos apenas nome profissional, mini-bio acadêmica, avatares gráficos autorizados sob licença CC BY 4.0 e links públicos profissionais (GitHub/LinkedIn), e utilizamos exclusivamente dados públicos do <em>Anchoring Mesh</em> do RIPE Atlas.
+    </p>
+
+    <div class="grade-autores">
+      <article class="cartao-autor">
+        <img src="./images/avatar_wendell.svg" alt="Avatar minimalista de Wendell Rodrigues Macedo">
+        <div>
+          <h3>Wendell Rodrigues Macedo</h3>
+          <p>Estudante de Ciência da Computação. Scrum Master das Sprints 2 a 5, responsável pelo pipeline de baseline, árvores CART, experimento comparativo e arquitetura da página.</p>
+          <div class="links-autor">
+            <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cartao-autor">
+        <img src="./images/avatar_vinicius.svg" alt="Avatar minimalista de Vinicius Firmino Souto">
+        <div>
+          <h3>Vinicius Firmino Souto</h3>
+          <p>Estudante de Ciência da Computação. Integração com a API REST do RIPE Atlas, administração do repositório público no GitHub e análise de Random Forest.</p>
+          <div class="links-autor">
+            <a href="https://github.com/vini-wine-coder" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cartao-autor">
+        <img src="./images/avatar_fernando.svg" alt="Avatar minimalista de Fernando Paiva Coelho">
+        <div>
+          <h3>Fernando Paiva Coelho</h3>
+          <p>Estudante de Ciência da Computação. Análise comparativa de métricas multiclasse, matrizes de confusão e estudo de custo operacional de erros em redes.</p>
+          <div class="links-autor">
+            <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cartao-autor">
+        <img src="./images/avatar_joao.svg" alt="Avatar minimalista de João Gustavo Sanches">
+        <div>
+          <h3>João Gustavo Sanches</h3>
+          <p>Estudante de Ciência da Computação. Análise de riscos, limitações operacionais de baseline fixo, estudo de janelas móveis e validação em fluxos inéditos.</p>
+          <div class="links-autor">
+            <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cartao-autor">
+        <img src="./images/avatar_daniel.svg" alt="Avatar minimalista de Daniel Dias Paranhos">
+        <div>
+          <h3>Daniel Dias Paranhos</h3>
+          <p>Estudante de Ciência da Computação. Curadoria das referências bibliográficas primárias, revisão técnica do artigo e estruturação do quadro comparativo.</p>
+          <div class="links-autor">
+            <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      <strong>Estrutura de Dados II — Centro Universitário Braz Cubas — Profa. Dra. Andréa Ono Sakai</strong><br>
+      Licença do texto, código e figuras SVG: <a href="https://creativecommons.org/licenses/by/4.0/deed.pt_BR" target="_blank" rel="noopener noreferrer">Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)</a> · Última revisão: 31/10/2026 ·
+      Código-fonte e dados: <a href="https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede" target="_blank" rel="noopener noreferrer">github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede</a>
+    </p>
+  </footer>
+
+</main>
+
+</body>
+</html>

@@ -1,4 +1,153 @@
-# Memorando de Decisão — Fonte de Dados do Projeto
+# Preditor de Degradação de Rede com RTT Normalizado — Árvore de Decisão (CART), Random Forest e XGBoost
+
+> **Projeto Interdisciplinar — Estrutura de Dados II**  
+> **Orientadora:** Profa. Dra. Andréa Ono Sakai  
+> **Autores:** Wendell Rodrigues Macedo, Vinicius Firmino Souto, Fernando Paiva Coelho, Joao Gustavo Sanches e Daniel Dias Paranhos  
+> **Licença:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+
+---
+
+## 🌐 Artigo Técnico Publicado (Página Web)
+
+- **URL pública (GitHub Pages):** [https://vini-wine-coder.github.io/Projeto-Modelo-Previs-o-Falha-Rede/](https://vini-wine-coder.github.io/Projeto-Modelo-Previs-o-Falha-Rede/)
+- **Arquivo principal da página:** [`index.html`](index.html) (estilizado em [`styles/artigo.css`](styles/artigo.css) com diagramas vetoriais autorais em [`images/`](images/))
+- **Quadro de observação de referências (Passo 1 do artigo):** [`metadados/quadro_observacao_artigo.md`](metadados/quadro_observacao_artigo.md)
+
+Para visualizar o artigo localmente no navegador sem servidor adicional:
+
+```bash
+xdg-open index.html
+# ou sirva via HTTP local:
+python3 -m http.server 8000
+```
+
+---
+
+## 📊 Resumo Executivo do Experimento Comparativo
+
+Avaliamos **Árvore de Decisão (CART)**, **Random Forest (Bagging)** e **XGBoost (Gradient Boosting)** na detecção multiclasse (`OK`, `RISCO`, `FALHA`) de degradação de rotas de Internet com RTT normalizado por baseline da própria rota (`z_robusto`), utilizando **96.519 janelas reais** da API pública do **RIPE Atlas** (`k-root DNS`, Measurement ID `#10301`) com corte temporal estrito:
+
+- **Treino (Período A):** `2026-03-01` a `2026-03-07` (`48.249` janelas)
+- **Teste (Período B):** `2026-03-08` a `2026-03-14` (`48.270` janelas: `28.303 OK`, `189 RISCO`, `19.778 FALHA`)
+
+| Modelo | Hiperparâmetros Principais | Accuracy | Precision (Macro) | Recall (Macro) | Recall `FALHA` | Recall `RISCO` | F1 (Macro) | Treino (ms) | Inferência / Amostra (µs) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Árvore de Decisão (CART — 7 folhas)** | `criterion='entropy', max_depth=6, min_samples_leaf=20, random_state=42` | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **844.61** | **0.1765 µs (1.0x)** |
+| **Random Forest (Bagging — 15 árvores)** | `n_estimators=15, max_depth=6, max_features=5, min_samples_leaf=20, random_state=42` | 0.9967 | 0.9882 | 0.7178 | 1.0000 | 0.1534 | 0.7544 | 18,779.15 | 4.7970 µs (27.2x) |
+| **XGBoost (Gradient Boosting — 36 árvores)** | `n_estimators=12, max_depth=6, learning_rate=0.35, reg_lambda=1.0, gamma=0.1, seed=42` | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **1.0000** | **1.0000** | 52,649.35 | 7.4960 µs (42.5x) |
+
+**Decisão Técnica:** Recomendamos a **Árvore de Decisão (CART) podada de 7 folhas** para operação em produção no NOC. Ela empata em desempenho preditivo máximo (`F1 Macro = 1.0000`) com o XGBoost, supera amplamente a Random Forest (`F1 Macro = 0.7544`, penalizada pela diluição da classe rara `RISCO` na amostragem de atributos `max_features=5`), é **42,5 vezes mais rápida em inferência** (`0.18 µs` vs `7.50 µs` por amostra) e mantém **100% de transparência caixa-branca** (7 regras explícitas em português auditáveis pelo engenheiro de plantão).
+
+---
+
+## ⚙️ Como Reproduzir o Experimento Passo a Passo
+
+### 1. Pré-requisitos e Ambiente Python
+
+- **Python:** `>= 3.12` (validado em Python `3.12` / `3.14`)
+- **Pacotes e versões de referência ([`requirements.txt`](requirements.txt)):**
+  - `scikit-learn==1.5.2`
+  - `xgboost==2.1.2`
+  - `pandas==2.2.3`
+  - `numpy==2.1.2`
+  - `matplotlib==3.9.2`
+  - `jupyter==1.1.1`
+
+> **Nota sobre execução determinística:** Os scripts em `src/` foram implementados também com suporte nativo à biblioteca padrão do Python (`csv`, `math`, `random`, `json`) com `SEED = 42`, permitindo reproduzir 100% das métricas, matrizes de confusão e JSONs de saída mesmo em ambientes minimalistas sem dependências externas, além de fornecer o código equivalente em `scikit-learn` e `xgboost` no artigo e nos notebooks.
+
+### 2. Instalação (Opcional, para ambiente virtual completo)
+
+```bash
+git clone https://github.com/vini-wine-coder/Projeto-Modelo-Previs-o-Falha-Rede.git
+cd Projeto-Modelo-Previs-o-Falha-Rede
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 3. Onde Estão os Dados
+
+Todos os arquivos de dados processados e auditados já estão versionados no repositório em [`data/processed/`](data/processed/):
+
+- [`data/processed/dataset_processado_v0.2.csv`](data/processed/dataset_processado_v0.2.csv) — Dataset consolidado completo (`96.519` janelas de 5 min, 20 probes globais RIPE Atlas).
+- [`data/processed/treino_periodo_a.csv`](data/processed/treino_periodo_a.csv) — Conjunto de Treino (`48.249` janelas, `2026-03-01` a `2026-03-07`).
+- [`data/processed/teste_periodo_b.csv`](data/processed/teste_periodo_b.csv) — Conjunto de Teste temporalmente disjunto (`48.270` janelas, `2026-03-08` a `2026-03-14`).
+- [`metadados/dicionario_dados_v0.4.md`](metadados/dicionario_dados_v0.4.md) — Dicionário de dados completo com unidades, tipos e regras da variável-alvo.
+
+### 4. Comandos para Executar o Pipeline e o Experimento do Artigo
+
+```bash
+# Tarefa 3 — Primeiras árvores de decisão (rasas max_depth=3 e livres)
+python3 src/primeiras_arvores.py
+
+# Tarefa 4 — Ajuste da árvore (poda por profundidade, min_samples_leaf e seleção de atributos)
+python3 src/ajuste_arvore.py
+
+# Tarefa 5 — Árvore Final escolhida (7 folhas, regras em português e importância MDI)
+python3 src/arvore_final.py
+
+# Artigo Técnico — Experimento comparativo: Árvore de Decisão vs Random Forest vs XGBoost
+python3 src/experimento_artigo.py
+```
+
+O script [`src/experimento_artigo.py`](src/experimento_artigo.py) imprime no terminal a tabela comparativa completa, as matrizes de confusão 3×3 e salva todas as métricas auditáveis em [`metadados/resumo_artigo_comparativo.json`](metadados/resumo_artigo_comparativo.json).
+
+---
+
+## 📁 Estrutura do Repositório
+
+```text
+├── index.html                                         # Página web pública do artigo técnico (tema dark minimalista)
+├── styles/
+│   └── artigo.css                                     # Folha de estilos CSS (pitch-black #000000, Plus Jakarta Sans + JetBrains Mono)
+├── images/
+│   ├── diagrama_arvore_7folhas.svg                    # Diagrama vetorial completo da árvore CART de 7 folhas
+│   ├── esquema_bagging_vs_boosting.svg                # Esquema conceitual Bagging (Random Forest) vs Boosting (XGBoost)
+│   ├── grafico_metricas_tempos.svg                    # Gráfico comparativo de F1 Macro, Recall RISCO e latência de inferência
+│   └── avatar_*.svg                                   # Avatares vetoriais dos 5 autores
+├── src/
+│   ├── preparar_dados.py                              # Tarefa 2: Limpeza, normalização por rota (z_robusto) e split temporal
+│   ├── primeiras_arvores.py                           # Tarefa 3: Árvore rasa vs árvore livre (Gini e Entropia)
+│   ├── ajuste_arvore.py                               # Tarefa 4: Varredura de max_depth, min_samples_leaf e subconjuntos de features
+│   ├── arvore_final.py                                # Tarefa 5: Árvore final (7 folhas), regras operacionais e importância MDI
+│   └── experimento_artigo.py                          # Artigo: Comparação Árvore de Decisão vs Random Forest vs XGBoost
+├── notebooks/
+│   ├── 1_Coleta_RIPE_Atlas.ipynb                      # Tarefa 1: Coleta via REST API v2 do RIPE Atlas
+│   ├── 2_Preparacao_e_Auditoria_Dados.ipynb           # Tarefa 2: Preparação e auditoria sem vazamento temporal
+│   ├── 4_Primeiras_Arvores.ipynb                      # Tarefa 3: Experimento das primeiras árvores
+│   ├── 5_Ajuste_da_Arvore.ipynb                       # Tarefa 4: Experimento de poda e seleção de atributos
+│   ├── 6_Arvore_Final.ipynb                           # Tarefa 5: Documentação executável da Árvore Final
+│   └── 7_Experimento_Artigo_Arvore_RF_XGBoost.ipynb   # Artigo: Notebook executável comparando os 3 algoritmos
+├── tarefas/
+│   ├── Tarefa3_Primeiras_Arvores.md                   # Relatório da Tarefa 3
+│   ├── Tarefa4_Ajuste_da_Arvore.md                    # Relatório da Tarefa 4
+│   └── Tarefa5_Arvore_Final.md                        # Relatório da Tarefa 5
+├── metadados/
+│   ├── dicionario_dados_v0.4.md                       # Dicionário de dados atualizado até a Tarefa 5
+│   ├── quadro_observacao_artigo.md                    # Quadro de observação das 2 referências do artigo técnico
+│   ├── resumo_tarefa3.json                            # Métricas da Tarefa 3
+│   ├── resumo_tarefa4.json                            # Métricas da Tarefa 4
+│   ├── resumo_tarefa5.json                            # Métricas da Tarefa 5
+│   └── resumo_artigo_comparativo.json                 # Métricas do comparativo CART vs Random Forest vs XGBoost
+└── requirements.txt                                   # Pacotes e versões de referência
+```
+
+---
+
+## 📚 Créditos de Imagens, Dados e Referências Bibliográficas
+
+- **Figuras e Diagramas (`images/*.svg`):** Produzidos originalmente pelos autores do grupo para este artigo técnico e licenciados sob **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+- **Dados de Medição de Rede:** Coletados da API pública do **RIPE Atlas** (RIPE NCC — Measurement ID `#10301`, probes globais monitorando `k.root-servers.net`), utilizados conforme os termos abertos de pesquisa da plataforma RIPE Atlas.
+- **Referências Bibliográficas do Artigo:**
+  1. BREIMAN, L.; FRIEDMAN, J.; STONE, C. J.; OLSHEN, R. A. *Classification and Regression Trees*. Boca Raton: Chapman & Hall/CRC, 1984.
+  2. BREIMAN, L. Random Forests. *Machine Learning*, v. 45, n. 1, p. 5–32, 2001.
+  3. CHEN, T.; GUESTRIN, C. XGBoost: A Scalable Tree Boosting System. In: *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD '16)*, p. 785–794, 2016.
+  4. ACTIVESTATE. *Decision Tree vs. Random Forest vs. XGBoost: Key Differences*. ActiveState Blog, 2022.
+  5. RIPE NCC. *RIPE Atlas REST API v2 Documentation*. Disponível em: <https://atlas.ripe.net/docs/apis/>.
+
+---
+
+# Memorando de Decisão — Fonte de Dados do Projeto (Etapa Inicial)
 
 | Campo | Informação |
 |---|---|

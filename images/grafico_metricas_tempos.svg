@@ -1,42 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 290" role="img" aria-labelledby="t-gr d-gr">
   <title id="t-gr">Resultados no Teste (48.270 medições): F1 Macro, Recall de RISCO e Tempo de Predição</title>
   <desc id="d-gr">Gráfico de barras comparando Árvore de Decisão (F1 Macro 1,0000; Recall RISCO 100%; 0,18 microssegundos por amostra), Random Forest (F1 Macro 0,7544; Recall RISCO 15,34%; 4,80 microssegundos) e XGBoost (F1 Macro 1,0000; Recall RISCO 100%; 7,50 microssegundos).</desc>
-  <rect width="860" height="290" rx="12" fill="#f8fafc"/>
-  <text x="430" y="32" font-family="sans-serif" font-size="15" font-weight="bold" fill="#0f172a" text-anchor="middle">Desempenho no Teste (N = 48.270) vs. Latência de Predição por Amostra</text>
+  <rect width="860" height="290" rx="8" fill="#050505"/>
+  <text x="430" y="32" font-family="sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Desempenho no Teste (N = 48.270) vs. Latência de Predição por Amostra</text>
 
   <!-- Painel Esquerdo: F1 Macro e Recall RISCO -->
-  <text x="230" y="62" font-family="sans-serif" font-size="13" font-weight="bold" fill="#334155" text-anchor="middle">Qualidade de Detecção (F1 Macro e Recall de RISCO)</text>
+  <text x="230" y="62" font-family="sans-serif" font-size="12" font-weight="600" fill="#a1a1aa" text-anchor="middle">Qualidade de Detecção (F1 Macro e Recall de RISCO)</text>
   <!-- Árvore -->
-  <text x="25" y="102" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a">Árvore (CART)</text>
-  <rect x="135" y="84" width="240" height="14" rx="4" fill="#2563eb"/>
-  <text x="382" y="96" font-family="sans-serif" font-size="11" font-weight="bold" fill="#1e3a8a">F1 Macro: 1,0000</text>
-  <rect x="135" y="101" width="240" height="14" rx="4" fill="#60a5fa"/>
-  <text x="382" y="113" font-family="sans-serif" font-size="11" fill="#1e3a8a">Recall RISCO: 100,0%</text>
+  <text x="25" y="102" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#60a5fa">Árvore (CART)</text>
+  <rect x="135" y="84" width="230" height="13" rx="3" fill="#3b82f6"/>
+  <text x="374" y="95" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#93c5fd">F1 Macro: 1,0000</text>
+  <rect x="135" y="101" width="230" height="13" rx="3" fill="#1d4ed8"/>
+  <text x="374" y="112" font-family="sans-serif" font-size="10.5" fill="#93c5fd">Recall RISCO: 100,0%</text>
 
   <!-- Random Forest -->
-  <text x="25" y="162" font-family="sans-serif" font-size="12" font-weight="bold" fill="#9a3412">Random Forest</text>
-  <rect x="135" y="144" width="181" height="14" rx="4" fill="#d97706"/>
-  <text x="323" y="156" font-family="sans-serif" font-size="11" font-weight="bold" fill="#9a3412">F1 Macro: 0,7544</text>
-  <rect x="135" y="161" width="37" height="14" rx="4" fill="#fbbf24"/>
-  <text x="180" y="173" font-family="sans-serif" font-size="11" fill="#9a3412">Recall RISCO: 15,34%</text>
+  <text x="25" y="162" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#fbbf24">Random Forest</text>
+  <rect x="135" y="144" width="173" height="13" rx="3" fill="#f59e0b"/>
+  <text x="316" y="155" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#fcd34d">F1 Macro: 0,7544</text>
+  <rect x="135" y="161" width="35" height="13" rx="3" fill="#b45309"/>
+  <text x="178" y="172" font-family="sans-serif" font-size="10.5" fill="#fcd34d">Recall RISCO: 15,34%</text>
 
   <!-- XGBoost -->
-  <text x="25" y="222" font-family="sans-serif" font-size="12" font-weight="bold" fill="#065f46">XGBoost</text>
-  <rect x="135" y="204" width="240" height="14" rx="4" fill="#059669"/>
-  <text x="382" y="216" font-family="sans-serif" font-size="11" font-weight="bold" fill="#065f46">F1 Macro: 1,0000</text>
-  <rect x="135" y="221" width="240" height="14" rx="4" fill="#34d399"/>
-  <text x="382" y="233" font-family="sans-serif" font-size="11" fill="#065f46">Recall RISCO: 100,0%</text>
+  <text x="25" y="222" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#34d399">XGBoost</text>
+  <rect x="135" y="204" width="230" height="13" rx="3" fill="#10b981"/>
+  <text x="374" y="215" font-family="sans-serif" font-size="10.5" font-weight="600" fill="#6ee7b7">F1 Macro: 1,0000</text>
+  <rect x="135" y="221" width="230" height="13" rx="3" fill="#047857"/>
+  <text x="374" y="232" font-family="sans-serif" font-size="10.5" fill="#6ee7b7">Recall RISCO: 100,0%</text>
 
   <!-- Painel Direito: Latência de Predição -->
-  <line x1="485" y1="55" x2="485" y2="255" stroke="#cbd5e1" stroke-width="1.5"/>
-  <text x="670" y="62" font-family="sans-serif" font-size="13" font-weight="bold" fill="#334155" text-anchor="middle">Custo de Inferência (µs / medição — menor é melhor)</text>
+  <line x1="485" y1="55" x2="485" y2="255" stroke="#1c1c21" stroke-width="1.5"/>
+  <text x="670" y="62" font-family="sans-serif" font-size="12" font-weight="600" fill="#a1a1aa" text-anchor="middle">Custo de Inferência (µs / medição — menor é melhor)</text>
 
-  <rect x="510" y="90" width="8" height="22" rx="3" fill="#2563eb"/>
-  <text x="526" y="106" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a">0,1765 µs (8,52 ms p/ 48.270 linhas — 1x)</text>
+  <rect x="510" y="90" width="8" height="20" rx="3" fill="#3b82f6"/>
+  <text x="526" y="104" font-family="sans-serif" font-size="11" font-weight="600" fill="#93c5fd">0,1765 µs (8,52 ms p/ 48.270 linhas — 1x)</text>
 
-  <rect x="510" y="150" width="150" height="22" rx="3" fill="#d97706"/>
-  <text x="668" y="166" font-family="sans-serif" font-size="12" font-weight="bold" fill="#9a3412">4,7970 µs (27,2x mais lento)</text>
+  <rect x="510" y="150" width="145" height="20" rx="3" fill="#f59e0b"/>
+  <text x="663" y="164" font-family="sans-serif" font-size="11" font-weight="600" fill="#fcd34d">4,7970 µs (27,2x mais lento)</text>
 
-  <rect x="510" y="210" width="235" height="22" rx="3" fill="#059669"/>
-  <text x="752" y="226" font-family="sans-serif" font-size="12" font-weight="bold" fill="#065f46">7,4960 µs (42,5x)</text>
+  <rect x="510" y="210" width="225" height="20" rx="3" fill="#10b981"/>
+  <text x="743" y="224" font-family="sans-serif" font-size="11" font-weight="600" fill="#6ee7b7">7,4960 µs (42,5x)</text>
 </svg>
