@@ -1,0 +1,888 @@
+{
+  "contrato": {
+    "profundidade_escolhida_olhando_teste": false,
+    "baseline_teste_usou_medicao_do_teste": false,
+    "n_treino": 80386,
+    "n_validacao": 32148,
+    "n_teste_unico": 48270,
+    "colunas_usadas_x": [
+      "z_robusto",
+      "aumento_pct",
+      "jitter_relativo",
+      "perda_pct",
+      "timeout_atual",
+      "n5_timeout",
+      "n5_aumento80",
+      "n5_risco"
+    ],
+    "colunas_proibidas_bloqueadas": [
+      "timestamp",
+      "datetime_utc",
+      "fluxo_id",
+      "prb_id",
+      "dst_addr",
+      "sent",
+      "rcvd",
+      "avg_rtt_ms",
+      "jitter_ms",
+      "mediana_baseline_ms",
+      "mad_baseline_ms",
+      "jitter_tipico_ms",
+      "ordem_regra",
+      "split"
+    ]
+  },
+  "secao1_arvore_medida": {
+    "parametros": {
+      "algoritmo": "DecisionTreeClassifier (CART)",
+      "criterion": "entropy",
+      "max_depth": 6,
+      "min_samples_leaf": 20,
+      "random_state": 42
+    },
+    "profundidade_real": 6,
+    "n_folhas": 7,
+    "n_nos": 13,
+    "diagrama_texto": "|--- z_robusto <= 3.5010 (n=80386, entropy=1.0058)\n|   |--- perda_pct <= 16.6650 (n=60817, entropy=0.8028)\n|   |   |--- n5_aumento80 <= 1.5000 (n=50520, entropy=0.3902)\n|   |   |   |--- n5_timeout <= 2.5000 (n=48629, entropy=0.2319)\n|   |   |   |   |--- z_robusto <= 2.0003 (n=47257, entropy=0.0479)\n|   |   |   |   |   |--- classe: OK (n=46212, [OK=46212, RISCO=0, FALHA=0], entropy=-0.0000)\n|   |   |   |   |--- z_robusto >  2.0003\n|   |   |   |   |   |--- n5_risco <= 1.5000 (n=1045, entropy=0.7969)\n|   |   |   |   |   |   |--- classe: OK (n=793, [OK=793, RISCO=0, FALHA=0], entropy=-0.0000)\n|   |   |   |   |   |--- n5_risco >  1.5000\n|   |   |   |   |   |   |--- classe: RISCO (n=252, [OK=0, RISCO=252, FALHA=0], entropy=-0.0000)\n|   |   |   |--- n5_timeout >  2.5000\n|   |   |   |   |--- classe: FALHA (n=1372, [OK=0, RISCO=0, FALHA=1372], entropy=-0.0000)\n|   |   |--- n5_aumento80 >  1.5000\n|   |   |   |--- classe: FALHA (n=1891, [OK=0, RISCO=0, FALHA=1891], entropy=-0.0000)\n|   |--- perda_pct >  16.6650\n|   |   |--- classe: FALHA (n=10297, [OK=0, RISCO=0, FALHA=10297], entropy=-0.0000)\n|--- z_robusto >  3.5010\n|   |--- classe: FALHA (n=19569, [OK=0, RISCO=0, FALHA=19569], entropy=-0.0000)",
+    "regras_portugues": [
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto <= 2.0003, então classe = OK",
+        "classe_folha": "OK",
+        "profundidade_folha": 5,
+        "n_treino": 46212,
+        "contagem_treino": {
+          "OK": 46212,
+          "RISCO": 0,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto > 2.0003 e n5_risco <= 1.5000, então classe = OK",
+        "classe_folha": "OK",
+        "profundidade_folha": 6,
+        "n_treino": 793,
+        "contagem_treino": {
+          "OK": 793,
+          "RISCO": 0,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout <= 2.5000 e z_robusto > 2.0003 e n5_risco > 1.5000, então classe = RISCO",
+        "classe_folha": "RISCO",
+        "profundidade_folha": 6,
+        "n_treino": 252,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 252,
+          "FALHA": 0
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 <= 1.5000 e n5_timeout > 2.5000, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 4,
+        "n_treino": 1372,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 1372
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct <= 16.6650 e n5_aumento80 > 1.5000, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 3,
+        "n_treino": 1891,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 1891
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto <= 3.5010 e perda_pct > 16.6650, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 2,
+        "n_treino": 10297,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 10297
+        },
+        "impureza": -0.0
+      },
+      {
+        "regra_pt": "Se z_robusto > 3.5010, então classe = FALHA",
+        "classe_folha": "FALHA",
+        "profundidade_folha": 1,
+        "n_treino": 19569,
+        "contagem_treino": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19569
+        },
+        "impureza": -0.0
+      }
+    ]
+  },
+  "secao2_teste_temporal_unico": {
+    "avaliacao_arvore_final_teste": {
+      "matriz_confusao": {
+        "OK": {
+          "OK": 28303,
+          "RISCO": 0,
+          "FALHA": 0
+        },
+        "RISCO": {
+          "OK": 0,
+          "RISCO": 189,
+          "FALHA": 0
+        },
+        "FALHA": {
+          "OK": 0,
+          "RISCO": 0,
+          "FALHA": 19778
+        }
+      },
+      "por_classe": {
+        "OK": {
+          "precisao": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "suporte": 28303
+        },
+        "RISCO": {
+          "precisao": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "suporte": 189
+        },
+        "FALHA": {
+          "precisao": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "suporte": 19778
+        }
+      },
+      "f1_macro": 1.0,
+      "balanced_accuracy": 1.0,
+      "acuracia": 1.0,
+      "total_amostras": 48270,
+      "total_erros": 0
+    },
+    "avaliacao_arvore_tarefa3_teste_referencia": {
+      "matriz_confusao": {
+        "OK": {
+          "OK": 28300,
+          "RISCO": 0,
+          "FALHA": 3
+        },
+        "RISCO": {
+          "OK": 188,
+          "RISCO": 0,
+          "FALHA": 1
+        },
+        "FALHA": {
+          "OK": 824,
+          "RISCO": 0,
+          "FALHA": 18954
+        }
+      },
+      "por_classe": {
+        "OK": {
+          "precisao": 0.9655,
+          "recall": 0.9999,
+          "f1": 0.9824,
+          "suporte": 28303
+        },
+        "RISCO": {
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "suporte": 189
+        },
+        "FALHA": {
+          "precisao": 0.9998,
+          "recall": 0.9583,
+          "f1": 0.9786,
+          "suporte": 19778
+        }
+      },
+      "f1_macro": 0.6537,
+      "balanced_accuracy": 0.6527,
+      "acuracia": 0.979,
+      "total_amostras": 48270,
+      "total_erros": 1016
+    },
+    "desempenho_por_escopo_rota_teste": {
+      "curto": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 7182,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 40,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 4843
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 7182
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 40
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 4843
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 12065,
+        "total_erros": 0
+      },
+      "regional": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 14161,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 98,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 9874
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 14161
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 98
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 9874
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 24133,
+        "total_erros": 0
+      },
+      "longo": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 6960,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 51,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 5061
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 6960
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 51
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 5061
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 12072,
+        "total_erros": 0
+      }
+    },
+    "casos_destacados_teste": {
+      "acerto_caminho_longo_estavel_ok": {
+        "fluxo_id": "301|14.139.0.1",
+        "rota": "BR->IN",
+        "escopo": "longo",
+        "datetime_utc": "2026-09-18T02:32:00Z",
+        "timestamp": 1789698720,
+        "avg_rtt_ms": "342.77",
+        "mediana_baseline_ms": "339.2500",
+        "mad_baseline_ms": "2.5400",
+        "z_robusto": "0.9347",
+        "perda_pct": "0.00",
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 0,
+        "classe_real": "OK",
+        "pred_arvore_final": "OK",
+        "regra_absoluta_ingenua": "FALHA (RTT > 100 ms)"
+      },
+      "caso_fronteira_risco_falha_corrigido": {
+        "fluxo_id": "301|155.232.0.1",
+        "rota": "BR->ZA",
+        "escopo": "longo",
+        "datetime_utc": "2026-09-20T03:56:00Z",
+        "timestamp": 1789876560,
+        "avg_rtt_ms": "358.20",
+        "mediana_baseline_ms": "344.0950",
+        "mad_baseline_ms": "2.7850",
+        "z_robusto": "3.4160",
+        "perda_pct": "0.00",
+        "n5_timeout": 0,
+        "n5_aumento80": 0,
+        "n5_risco": 2,
+        "classe_real": "RISCO",
+        "pred_tarefa3_gini": "FALHA",
+        "pred_arvore_final": "RISCO",
+        "explicacao": "Na Tarefa 3 (Gini, raiz em z <= 3.4073), esta medição RISCO (z=3.4160, n5_risco=2) sofria falso alarme de FALHA; na Árvore Final (Entropia, raiz em z <= 3.5010), é classificada corretamente como RISCO."
+      },
+      "caso_falha_curto_timeout_corrigido": {
+        "fluxo_id": "101|194.109.133.10",
+        "rota": "DE->DE",
+        "escopo": "curto",
+        "datetime_utc": "2026-09-18T04:20:00Z",
+        "timestamp": 1789705200,
+        "avg_rtt_ms": "13.21",
+        "mediana_baseline_ms": "14.1000",
+        "z_robusto": "-1.0350",
+        "perda_pct": "0.00",
+        "n5_timeout": 4,
+        "classe_real": "FALHA",
+        "pred_tarefa3_gini": "OK",
+        "pred_arvore_final": "FALHA"
+      }
+    }
+  },
+  "secao3_fluxo_nao_visto": {
+    "fluxos_excluidos_baseline_insuficiente": [
+      {
+        "fluxo_id": "301|170.81.100.114",
+        "total_amostras_a": 2156,
+        "amostras_validas_a": 262,
+        "prop_resposta": 0.1215,
+        "status_baseline": "baseline_insuficiente"
+      },
+      {
+        "fluxo_id": "302|170.81.100.114",
+        "total_amostras_a": 2520,
+        "amostras_validas_a": 300,
+        "prop_resposta": 0.119,
+        "status_baseline": "baseline_insuficiente"
+      },
+      {
+        "fluxo_id": "303|170.81.100.114",
+        "total_amostras_a": 2520,
+        "amostras_validas_a": 299,
+        "prop_resposta": 0.1187,
+        "status_baseline": "baseline_insuficiente"
+      }
+    ],
+    "protocolo_b_holdout_fluxos_inteiros": {
+      "descricao": "Hold-out de 16 fluxos inteiros (todas as sondas de sufixo *03 em 12 rotas: curtas, regionais e longas, incluindo BR->JP, BR->IN e BR->ZA), 100% ausentes do conjunto de treino, com ficha de baseline calculada apenas no Período A (>= 2.483 RTTs válidos).",
+      "n_fluxos_treino": 48,
+      "n_fluxos_nao_vistos": 16,
+      "n_linhas_treino_sem_fluxos_novos": 60291,
+      "n_linhas_avaliadas_fluxos_novos": 40201,
+      "avaliacao_global_fluxos_novos": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 23638,
+            "RISCO": 0,
+            "FALHA": 0
+          },
+          "RISCO": {
+            "OK": 0,
+            "RISCO": 138,
+            "FALHA": 0
+          },
+          "FALHA": {
+            "OK": 0,
+            "RISCO": 0,
+            "FALHA": 16425
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 23638
+          },
+          "RISCO": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 138
+          },
+          "FALHA": {
+            "precisao": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "suporte": 16425
+          }
+        },
+        "f1_macro": 1.0,
+        "balanced_accuracy": 1.0,
+        "acuracia": 1.0,
+        "total_amostras": 40201,
+        "total_erros": 0
+      },
+      "resumo_por_fluxo": [
+        {
+          "fluxo_id": "103|193.136.0.1",
+          "rota": "DE->PT",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2485,
+          "mediana_periodo_a_ms": 48.2,
+          "mad_periodo_a_ms": 1.37,
+          "n_avaliado_periodo_b": 2512,
+          "suporte_real": {
+            "OK": 1494,
+            "FALHA": 1009,
+            "RISCO": 9
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "103|194.109.133.10",
+          "rota": "DE->DE",
+          "escopo": "curto",
+          "amostras_validas_periodo_a": 2484,
+          "mediana_periodo_a_ms": 14.07,
+          "mad_periodo_a_ms": 0.56,
+          "n_avaliado_periodo_b": 2516,
+          "suporte_real": {
+            "OK": 1485,
+            "FALHA": 1020,
+            "RISCO": 11
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "203|200.0.206.1",
+          "rota": "AR->AR",
+          "escopo": "curto",
+          "amostras_validas_periodo_a": 2487,
+          "mediana_periodo_a_ms": 10.31,
+          "mad_periodo_a_ms": 0.36,
+          "n_avaliado_periodo_b": 2507,
+          "suporte_real": {
+            "OK": 1579,
+            "FALHA": 909,
+            "RISCO": 19
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|133.242.0.1",
+          "rota": "BR->JP",
+          "escopo": "longo",
+          "amostras_validas_periodo_a": 2490,
+          "mediana_periodo_a_ms": 277.175,
+          "mad_periodo_a_ms": 2.085,
+          "n_avaliado_periodo_b": 2511,
+          "suporte_real": {
+            "OK": 1442,
+            "FALHA": 1059,
+            "RISCO": 10
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|14.139.0.1",
+          "rota": "BR->IN",
+          "escopo": "longo",
+          "amostras_validas_periodo_a": 2500,
+          "mediana_periodo_a_ms": 339.375,
+          "mad_periodo_a_ms": 2.485,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "OK": 1451,
+            "FALHA": 1050,
+            "RISCO": 12
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|196.24.0.1",
+          "rota": "BR->ZA",
+          "escopo": "longo",
+          "amostras_validas_periodo_a": 2491,
+          "mediana_periodo_a_ms": 344.0,
+          "mad_periodo_a_ms": 2.79,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "FALHA": 1035,
+            "OK": 1467,
+            "RISCO": 11
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|200.136.34.1",
+          "rota": "BR->BR",
+          "escopo": "curto",
+          "amostras_validas_periodo_a": 2496,
+          "mediana_periodo_a_ms": 49.805,
+          "mad_periodo_a_ms": 1.625,
+          "n_avaliado_periodo_b": 2515,
+          "suporte_real": {
+            "OK": 1587,
+            "FALHA": 917,
+            "RISCO": 11
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|200.160.2.3",
+          "rota": "BR->BR",
+          "escopo": "curto",
+          "amostras_validas_periodo_a": 2493,
+          "mediana_periodo_a_ms": 49.76,
+          "mad_periodo_a_ms": 1.61,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "OK": 1541,
+            "FALHA": 967,
+            "RISCO": 5
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|200.40.0.1",
+          "rota": "BR->UY",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2486,
+          "mediana_periodo_a_ms": 64.69,
+          "mad_periodo_a_ms": 1.83,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "OK": 1523,
+            "FALHA": 987,
+            "RISCO": 3
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|200.87.0.1",
+          "rota": "BR->BO",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2492,
+          "mediana_periodo_a_ms": 85.3,
+          "mad_periodo_a_ms": 2.27,
+          "n_avaliado_periodo_b": 2512,
+          "suporte_real": {
+            "OK": 1475,
+            "FALHA": 1030,
+            "RISCO": 7
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "303|203.178.136.1",
+          "rota": "BR->JP",
+          "escopo": "longo",
+          "amostras_validas_periodo_a": 2495,
+          "mediana_periodo_a_ms": 277.11,
+          "mad_periodo_a_ms": 2.09,
+          "n_avaliado_periodo_b": 2514,
+          "suporte_real": {
+            "OK": 1400,
+            "FALHA": 1108,
+            "RISCO": 6
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "403|148.81.0.1",
+          "rota": "ES->PL",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2496,
+          "mediana_periodo_a_ms": 55.38,
+          "mad_periodo_a_ms": 1.52,
+          "n_avaliado_periodo_b": 2516,
+          "suporte_real": {
+            "OK": 1471,
+            "FALHA": 1040,
+            "RISCO": 5
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "403|212.191.0.1",
+          "rota": "ES->PL",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2485,
+          "mediana_periodo_a_ms": 55.37,
+          "mad_periodo_a_ms": 1.47,
+          "n_avaliado_periodo_b": 2511,
+          "suporte_real": {
+            "OK": 1401,
+            "FALHA": 1105,
+            "RISCO": 5
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "503|196.200.0.1",
+          "rota": "ZA->KE",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2494,
+          "mediana_periodo_a_ms": 89.495,
+          "mad_periodo_a_ms": 2.425,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "OK": 1476,
+            "FALHA": 1026,
+            "RISCO": 11
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "603|165.21.0.1",
+          "rota": "IN->SG",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2483,
+          "mediana_periodo_a_ms": 74.85,
+          "mad_periodo_a_ms": 2.0,
+          "n_avaliado_periodo_b": 2509,
+          "suporte_real": {
+            "OK": 1369,
+            "FALHA": 1132,
+            "RISCO": 8
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        },
+        {
+          "fluxo_id": "603|202.157.0.1",
+          "rota": "IN->SG",
+          "escopo": "regional",
+          "amostras_validas_periodo_a": 2487,
+          "mediana_periodo_a_ms": 74.77,
+          "mad_periodo_a_ms": 1.99,
+          "n_avaliado_periodo_b": 2513,
+          "suporte_real": {
+            "OK": 1477,
+            "FALHA": 1031,
+            "RISCO": 5
+          },
+          "erros": 0,
+          "acuracia": 1.0
+        }
+      ],
+      "exemplos_auditaveis": {
+        "longo_estavel_ok": {
+          "fluxo_id": "303|203.178.136.1",
+          "rota": "BR->JP",
+          "datetime_utc": "2026-09-13T04:32:00Z",
+          "avg_rtt_ms": "277.91",
+          "mediana_baseline_ms": "277.1100",
+          "z_robusto": "0.2582",
+          "classe_real": "OK",
+          "classe_predita": "OK"
+        },
+        "curto_degradado_falha": {
+          "fluxo_id": "103|194.109.133.10",
+          "rota": "DE->DE",
+          "datetime_utc": "2026-09-13T04:48:00Z",
+          "avg_rtt_ms": "18.31",
+          "mediana_baseline_ms": "14.0700",
+          "z_robusto": "5.1069",
+          "perda_pct": "0.00",
+          "classe_real": "FALHA",
+          "classe_predita": "FALHA"
+        },
+        "degradacao_risco": {
+          "fluxo_id": "103|193.136.0.1",
+          "rota": "DE->PT",
+          "datetime_utc": "2026-09-14T00:16:00Z",
+          "avg_rtt_ms": "55.07",
+          "mediana_baseline_ms": "48.2000",
+          "z_robusto": "3.3823",
+          "n5_risco": 2,
+          "classe_real": "RISCO",
+          "classe_predita": "RISCO"
+        }
+      }
+    }
+  },
+  "secao4_declaracoes_e_horizonte_12min": {
+    "natureza_rotulo": "A árvore reproduz com 100% de fidelidade (F1 macro = 1.0000 no teste) a política operacional determinística definida na Tarefa 2 sobre as próprias métricas relativas ao baseline (COLUNAS_MODELO), e não um log externo de falha de hardware/roteador.",
+    "comparacao_horizonte_12min_teste": {
+      "n_pares_avaliados_teste": 48078,
+      "regra_persistencia_repetir_atual": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 20894,
+            "RISCO": 143,
+            "FALHA": 7147
+          },
+          "RISCO": {
+            "OK": 65,
+            "RISCO": 2,
+            "FALHA": 121
+          },
+          "FALHA": {
+            "OK": 7226,
+            "RISCO": 44,
+            "FALHA": 12436
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 0.7413,
+            "recall": 0.7413,
+            "f1": 0.7413,
+            "suporte": 28184
+          },
+          "RISCO": {
+            "precisao": 0.0106,
+            "recall": 0.0106,
+            "f1": 0.0106,
+            "suporte": 188
+          },
+          "FALHA": {
+            "precisao": 0.6311,
+            "recall": 0.6311,
+            "f1": 0.6311,
+            "suporte": 19706
+          }
+        },
+        "f1_macro": 0.461,
+        "balanced_accuracy": 0.461,
+        "acuracia": 0.6933,
+        "total_amostras": 48078,
+        "total_erros": 14746
+      },
+      "arvore_preditora_12min": {
+        "matriz_confusao": {
+          "OK": {
+            "OK": 25451,
+            "RISCO": 0,
+            "FALHA": 2733
+          },
+          "RISCO": {
+            "OK": 147,
+            "RISCO": 0,
+            "FALHA": 41
+          },
+          "FALHA": {
+            "OK": 9205,
+            "RISCO": 0,
+            "FALHA": 10501
+          }
+        },
+        "por_classe": {
+          "OK": {
+            "precisao": 0.7313,
+            "recall": 0.903,
+            "f1": 0.8081,
+            "suporte": 28184
+          },
+          "RISCO": {
+            "precisao": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "suporte": 188
+          },
+          "FALHA": {
+            "precisao": 0.791,
+            "recall": 0.5329,
+            "f1": 0.6368,
+            "suporte": 19706
+          }
+        },
+        "f1_macro": 0.4816,
+        "balanced_accuracy": 0.4786,
+        "acuracia": 0.7478,
+        "total_amostras": 48078,
+        "total_erros": 12126
+      },
+      "exemplo_erro_transicao_abrupta_12min": {
+        "fluxo_id": "101|193.136.0.1",
+        "rota": "DE->PT",
+        "escopo": "regional",
+        "datetime_utc_atual": "2026-09-18T02:28:00Z",
+        "avg_rtt_ms_atual": "47.64",
+        "z_robusto_atual": "-0.2848",
+        "perda_pct_atual": "0.00",
+        "classe_atual_t": "OK",
+        "classe_futura_t_mais_12min": "FALHA",
+        "pred_arvore_12min": "OK",
+        "pred_persistencia_12min": "OK"
+      },
+      "conclusao_operacional": "No horizonte de 12 minutos à frente (3 ciclos de 240s), a árvore (F1 macro = 0.4816, Recall FALHA = 53.29%, Recall RISCO = 0.00%) não supera de forma útil a persistência do estado atual (F1 macro = 0.4610, Recall FALHA = 63.11%, Recall RISCO = 1.06%). Portanto, declara-se formalmente que o artefato entregue é um DETECTOR de degradação do estado atual relativo ao baseline do fluxo, e não um preditor de 12 minutos à frente."
+    }
+  }
+}
